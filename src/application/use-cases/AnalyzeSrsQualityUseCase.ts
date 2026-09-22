@@ -14,6 +14,6 @@ export class AnalyzeSrsQualityUseCase {
     if (!project) throw new Error("Proyecto no encontrado.");
 
     const answers = await this.answers.findByProjectId(projectId);
-    return this.analyzer.analyze(answers);
+    return this.analyzer.analyze(project.id, answers);
   }
 }
