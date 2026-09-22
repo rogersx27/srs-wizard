@@ -77,6 +77,8 @@ Ver [.env.example](.env.example):
 | `AI_GATEWAY_MODEL` | Opcional. Modelo de texto del gateway para la redacción y la detección de duplicados (default `anthropic/claude-haiku-4.5`) |
 | `AI_GATEWAY_EVALUATION_MODEL` | Opcional. Modelo de evaluación del gateway para la detección de vaguedad (default [`typesafe-ai/jev`](https://vercel.com/ai-gateway/models/jev)) |
 
+Detalles de cómo se usa Jev como IA de evaluación en la revisión de calidad: [docs/ia-evaluacion-jev.md](docs/ia-evaluacion-jev.md).
+
 ## Contribuir
 
 ### Utilidades de interfaz
