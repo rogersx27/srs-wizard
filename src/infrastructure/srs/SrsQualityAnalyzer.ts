@@ -4,9 +4,8 @@ import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 import type { IAiCacheRepository } from "@/domain/repositories/IAiCacheRepository";
 import { WIZARD_CATALOG } from "@/wizard-catalog/wizardCatalog";
 import { RequirementIdGenerator } from "./RequirementIdGenerator";
-import { NullAiAssistant } from "../ai/NullAiAssistant.ts";
 import { PrismaAiCacheRepository } from "../persistence/prisma/PrismaAiCacheRepository.ts";
-import { withCache } from "../ai/cachedCompute.ts";
+import { NullAiAssistant, withCache } from "@rogersx27/ai-ports";
 import {
   findMissingPriority,
   analyzeWithAi,

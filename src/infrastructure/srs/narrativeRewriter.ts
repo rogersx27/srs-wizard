@@ -1,5 +1,5 @@
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
-import { withTimeout } from "../ai/withTimeout.ts";
+import { withTimeout } from "@rogersx27/ai-ports";
 
 const TIMEOUT_MS = 10_000;
 

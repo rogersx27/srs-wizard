@@ -18,6 +18,7 @@
     "@anthropic-ai/sdk": "^0.127.0",
     "@google/genai": "^2.23.0",
     "@prisma/client": "6.19.3",
+    "@rogersx27/ai-ports": "github:rogersx27/ai-ports#v0.1.1",
     "ai": "^7.0.107",
     "clsx": "^2.1.1",
     "driver.js": "^1.8.0",

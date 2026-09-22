@@ -19,16 +19,18 @@ export interface IAiEvaluator {
 }
 ```
 
-El puerto solo expone preguntas de sí/no porque es lo único que se necesita hoy. Igual que con `IAiAssistant`, ni `domain` ni `application` conocen el SDK: todo lo del proveedor vive en `src/infrastructure/ai/`.
+El puerto solo expone preguntas de sí/no porque es lo único que se necesita hoy. Igual que con `IAiAssistant`, ni `domain` ni `application` conocen el SDK.
+
+Los puertos, los adaptadores y las utilidades viven en la librería [`@rogersx27/ai-ports`](https://github.com/rogersx27/ai-ports), extraída de este repo para reutilizarla en otros proyectos. `src/domain/ports/` re-exporta sus tipos.
 
 | Archivo | Rol |
 |---|---|
-| `src/domain/ports/IAiEvaluator.ts` | Puerto: estado + preguntas de sí/no → probabilidades |
-| `src/infrastructure/ai/GatewayAiEvaluator.ts` | Adaptador: llama a Jev (u otro modelo de evaluación) vía AI Gateway |
-| `src/infrastructure/ai/NullAiEvaluator.ts` | Adaptador nulo: lanza `AiUnavailableError` |
-| `src/infrastructure/ai/GatewayAiAssistant.ts` | Proveedor de **texto** del gateway (`IAiAssistant`), independiente de Jev |
+| `src/domain/ports/IAiEvaluator.ts` | Puerto: estado + preguntas de sí/no → probabilidades (re-exportado de `@rogersx27/ai-ports`) |
+| `GatewayAiEvaluator` (`@rogersx27/ai-ports/gateway`) | Adaptador: llama a Jev (u otro modelo de evaluación) vía AI Gateway |
+| `NullAiEvaluator` (`@rogersx27/ai-ports`) | Adaptador nulo: lanza `AiUnavailableError` |
+| `GatewayAiAssistant` (`@rogersx27/ai-ports/gateway`) | Proveedor de **texto** del gateway (`IAiAssistant`), independiente de Jev |
 | `src/infrastructure/srs/qualityAnalysis.ts` | Lógica de la revisión: reparte los chequeos entre evaluador y asistente |
-| `src/container/di.ts` | Decide si hay evaluador según `AI_GATEWAY_API_KEY` |
+| `src/container/di.ts` | Construye los adaptadores y decide si hay evaluador según `AI_GATEWAY_API_KEY` |
 
 ## Qué decide Jev y qué no
 

@@ -5,10 +5,8 @@ import type { IAiCacheRepository } from "@/domain/repositories/IAiCacheRepositor
 import { WIZARD_CATALOG } from "@/wizard-catalog/wizardCatalog";
 import { RequirementIdGenerator } from "./RequirementIdGenerator";
 import { SrsMarkdownTemplate, type SrsNarrative } from "./SrsMarkdownTemplate";
-import { NullAiAssistant } from "@/infrastructure/ai/NullAiAssistant";
 import { PrismaAiCacheRepository } from "@/infrastructure/persistence/prisma/PrismaAiCacheRepository";
-import { hashContent } from "@/infrastructure/ai/contentHash";
-import { withCache } from "@/infrastructure/ai/cachedCompute";
+import { hashContent, NullAiAssistant, withCache } from "@rogersx27/ai-ports";
 import { resolveNarrativeSection } from "./narrativeRewriter";
 import { collectAnswerNotes } from "./answerNotes";
 

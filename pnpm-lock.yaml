@@ -118,6 +118,9 @@ importers:
       '@prisma/client':
         specifier: 6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
+      '@rogersx27/ai-ports':
+        specifier: github:rogersx27/ai-ports#v0.1.1
+        version: https://codeload.github.com/rogersx27/ai-ports/tar.gz/1f702741cbe66112835b37fca125965d411ac601(@anthropic-ai/sdk@0.127.0(zod@4.6.5))(@google/genai@2.23.0(supports-color@7.2.0))(ai@7.0.107(zod@4.6.5))(openai@7.20.0(undici@7.29.1)(ws@8.21.3)(zod@4.6.5))
       ai:
         specifier: ^7.0.107
         version: 7.0.107(zod@4.6.5)
@@ -682,6 +685,25 @@ packages:
 
   '@protobufjs/utf8@1.1.2':
     resolution: {integrity: sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug==}
+
+  '@rogersx27/ai-ports@https://codeload.github.com/rogersx27/ai-ports/tar.gz/1f702741cbe66112835b37fca125965d411ac601':
+    resolution: {gitHosted: true, integrity: sha512-+a+TdesSKtO5VRa59MqCe6bWGDHx6dt0f4GAp/fUkPDhwoNKF5n0OgMdJktvhC1cNur87WSim/dPkmHGl8KvJw==, tarball: https://codeload.github.com/rogersx27/ai-ports/tar.gz/1f702741cbe66112835b37fca125965d411ac601}
+    version: 0.1.1
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@anthropic-ai/sdk': '>=0.127.0'
+      '@google/genai': '>=2.23.0'
+      ai: ^7.0.107
+      openai: '>=7.20.0'
+    peerDependenciesMeta:
+      '@anthropic-ai/sdk':
+        optional: true
+      '@google/genai':
+        optional: true
+      ai:
+        optional: true
+      openai:
+        optional: true
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
@@ -3290,6 +3312,13 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.2': {}
+
+  '@rogersx27/ai-ports@https://codeload.github.com/rogersx27/ai-ports/tar.gz/1f702741cbe66112835b37fca125965d411ac601(@anthropic-ai/sdk@0.127.0(zod@4.6.5))(@google/genai@2.23.0(supports-color@7.2.0))(ai@7.0.107(zod@4.6.5))(openai@7.20.0(undici@7.29.1)(ws@8.21.3)(zod@4.6.5))':
+    optionalDependencies:
+      '@anthropic-ai/sdk': 0.127.0(zod@4.6.5)
+      '@google/genai': 2.23.0(supports-color@7.2.0)
+      ai: 7.0.107(zod@4.6.5)
+      openai: 7.20.0(undici@7.29.1)(ws@8.21.3)(zod@4.6.5)
 
   '@rtsao/scc@1.1.0': {}
 
