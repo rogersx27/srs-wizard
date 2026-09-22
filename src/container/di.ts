@@ -20,8 +20,11 @@ import { SrsQualityAnalyzer } from "@/infrastructure/srs/SrsQualityAnalyzer";
 import { GeminiAiAssistant } from "@/infrastructure/ai/GeminiAiAssistant";
 import { AnthropicAiAssistant } from "@/infrastructure/ai/AnthropicAiAssistant";
 import { OpenAiAssistant } from "@/infrastructure/ai/OpenAiAssistant";
+import { GatewayAiAssistant } from "@/infrastructure/ai/GatewayAiAssistant";
+import { GatewayAiEvaluator } from "@/infrastructure/ai/GatewayAiEvaluator";
 import { NullAiAssistant } from "@/infrastructure/ai/NullAiAssistant";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
+import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 
 const projectRepository = new PrismaProjectRepository();
 const answerRepository = new PrismaAnswerRepository();
@@ -32,15 +35,24 @@ function createAiAssistant(): IAiAssistant {
   if (provider === "anthropic") return new AnthropicAiAssistant();
   if (provider === "openai") return new OpenAiAssistant();
   if (provider === "gemini") return new GeminiAiAssistant();
+  if (provider === "gateway") return new GatewayAiAssistant();
   if (process.env.GEMINI_API_KEY) return new GeminiAiAssistant();
   if (process.env.ANTHROPIC_API_KEY) return new AnthropicAiAssistant();
   if (process.env.OPENAI_API_KEY) return new OpenAiAssistant();
+  if (process.env.AI_GATEWAY_API_KEY) return new GatewayAiAssistant();
   return new NullAiAssistant();
+}
+
+// El modelo de evaluación (Jev por defecto) es independiente de AI_PROVIDER: solo
+// juzga vaguedad en la revisión de calidad, la redacción sigue en el asistente.
+function createAiEvaluator(): IAiEvaluator | undefined {
+  if (process.env.AI_GATEWAY_API_KEY) return new GatewayAiEvaluator();
+  return undefined;
 }
 
 const aiAssistant: IAiAssistant = createAiAssistant();
 const srsDocumentGenerator = new SrsDocumentGenerator(undefined, undefined, aiAssistant, aiCacheRepository);
-const srsQualityAnalyzer = new SrsQualityAnalyzer(undefined, aiAssistant, aiCacheRepository);
+const srsQualityAnalyzer = new SrsQualityAnalyzer(undefined, aiAssistant, aiCacheRepository, createAiEvaluator());
 
 export const container = {
   createProject: new CreateProjectUseCase(projectRepository),

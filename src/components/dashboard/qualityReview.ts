@@ -1,4 +1,4 @@
-import type { QualityFinding, QualityFindingType } from "@/infrastructure/srs/qualityAnalysis";
+import type { AiCheck, QualityFinding, QualityFindingType } from "@/infrastructure/srs/qualityAnalysis";
 
 export interface ReviewFinding extends QualityFinding {
   number: number;
@@ -48,4 +48,20 @@ export function countByType(findings: QualityFinding[]): Record<QualityFindingTy
   const counts: Record<QualityFindingType, number> = { missing_priority: 0, vagueness: 0, duplicate: 0 };
   for (const finding of findings) counts[finding.type] += 1;
   return counts;
+}
+
+/** Aviso para la revisión de calidad cuando uno o ambos chequeos de IA no respondieron. */
+export function aiUnavailableNotice(unavailableChecks: readonly AiCheck[]): string | null {
+  const vagueness = unavailableChecks.includes("vagueness");
+  const duplicate = unavailableChecks.includes("duplicate");
+  if (vagueness && duplicate) {
+    return "Nota: la revisión de vaguedad y posibles duplicados con IA no está disponible en este momento; solo se muestran advertencias de prioridad faltante.";
+  }
+  if (vagueness) {
+    return "Nota: la revisión de vaguedad con IA no está disponible en este momento; se muestran las advertencias de posibles duplicados y de prioridad faltante.";
+  }
+  if (duplicate) {
+    return "Nota: la revisión de posibles duplicados con IA no está disponible en este momento; se muestran las advertencias de vaguedad y de prioridad faltante.";
+  }
+  return null;
 }

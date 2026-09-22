@@ -66,13 +66,18 @@ Ver [.env.example](.env.example):
 | `DATABASE_URL` | Ruta del archivo SQLite dentro del contenedor (`file:/data/app.db`, en el volumen persistente) |
 | `DASHBOARD_PASSWORD` | Contraseña compartida para entrar al dashboard |
 | `DASHBOARD_SESSION_SECRET` | Clave para firmar la cookie de sesión (HMAC) |
-| `AI_PROVIDER` | Opcional. `"gemini"`, `"anthropic"` u `"openai"` — decide qué proveedor usar cuando hay más de una clave configurada. Sin definir, se prefiere Gemini, luego Anthropic, luego OpenAI, según cuál tenga clave |
+| `AI_PROVIDER` | Opcional. `"gemini"`, `"anthropic"`, `"openai"` o `"gateway"` — decide qué proveedor usar cuando hay más de una clave configurada. Sin definir, se prefiere Gemini, luego Anthropic, luego OpenAI, luego Vercel AI Gateway, según cuál tenga clave |
 | `GEMINI_API_KEY` | Opcional. Habilita la redacción asistida por IA (Gemini, capa gratuita) de la Introducción y Descripción General del SRS. Sin ninguna clave de IA configurada, el documento usa el texto tal como lo escribió el cliente — el wizard y la generación del SRS funcionan igual. Clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey) |
 | `GEMINI_MODEL` | Opcional. Modelo de Gemini a usar (default `gemini-flash-latest`) |
 | `ANTHROPIC_API_KEY` | Opcional. Alternativa a Gemini para la misma redacción asistida. Clave en [Anthropic Console](https://console.anthropic.com/settings/keys) |
 | `ANTHROPIC_MODEL` | Opcional. Modelo de Claude a usar (default `claude-haiku-4-5-20251001`) |
 | `OPENAI_API_KEY` | Opcional. Otra alternativa para la misma redacción asistida. Clave en [OpenAI Platform](https://platform.openai.com/api-keys) |
 | `OPENAI_MODEL` | Opcional. Modelo de OpenAI a usar (default `gpt-5-mini`) |
+| `AI_GATEWAY_API_KEY` | Opcional. Clave de [Vercel AI Gateway](https://vercel.com/ai-gateway). Habilita el gateway como proveedor de redacción y, además, el modelo de evaluación para detectar requisitos vagos en la revisión de calidad (independiente de `AI_PROVIDER`) |
+| `AI_GATEWAY_MODEL` | Opcional. Modelo de texto del gateway para la redacción y la detección de duplicados (default `anthropic/claude-haiku-4.5`) |
+| `AI_GATEWAY_EVALUATION_MODEL` | Opcional. Modelo de evaluación del gateway para la detección de vaguedad (default [`typesafe-ai/jev`](https://vercel.com/ai-gateway/models/jev)) |
+
+Detalles de cómo se usa Jev como IA de evaluación en la revisión de calidad: [docs/ia-evaluacion-jev.md](docs/ia-evaluacion-jev.md).
 
 ## Contribuir
 

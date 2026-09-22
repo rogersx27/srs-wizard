@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  aiUnavailableNotice,
   countByType,
   findingsByRequirement,
   numberFindings,
@@ -67,4 +68,11 @@ test("counts and anchors are stable", () => {
     { type: "duplicate", message: "", requirementIds: ["RU-001", "RU-002"] },
   ]), { missing_priority: 0, vagueness: 2, duplicate: 1 });
   assert.equal(requirementAnchor("RNF-003"), "req-RNF-003");
+});
+
+test("aiUnavailableNotice describes exactly which AI checks are missing", () => {
+  assert.equal(aiUnavailableNotice([]), null);
+  assert.match(aiUnavailableNotice(["vagueness", "duplicate"]), /solo se muestran advertencias de prioridad faltante/);
+  assert.match(aiUnavailableNotice(["vagueness"]), /revisión de vaguedad con IA no está disponible.*posibles duplicados y de prioridad faltante/);
+  assert.match(aiUnavailableNotice(["duplicate"]), /revisión de posibles duplicados con IA no está disponible.*vaguedad y de prioridad faltante/);
 });

@@ -7,6 +7,11 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+
+- Vercel AI Gateway como proveedor de IA (`AI_PROVIDER="gateway"`, `AI_GATEWAY_API_KEY`, `AI_GATEWAY_MODEL`) para la redacción asistida del SRS.
+- Con `AI_GATEWAY_API_KEY` configurada, la revisión de calidad detecta requisitos vagos con el modelo de evaluación Jev (`typesafe-ai/jev`, configurable con `AI_GATEWAY_EVALUATION_MODEL`), y el modelo de texto queda solo para los posibles duplicados. Nuevo puerto `IAiEvaluator` para modelos de evaluación. Activar Jev o cambiar de modelo de evaluación invalida la revisión cacheada, y si solo uno de los dos chequeos de IA falla, el aviso de la revisión indica cuál.
+
 ## [0.4.0] - 2026-09-22
 
 ### Added

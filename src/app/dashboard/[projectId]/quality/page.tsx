@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { container } from "@/container/di";
 import { QualityDocumentReview } from "@/components/dashboard/QualityDocumentReview";
+import { aiUnavailableNotice } from "@/components/dashboard/qualityReview";
 
 export default async function QualityPage({
   params,
@@ -15,6 +16,7 @@ export default async function QualityPage({
     container.generateSrsDocument.execute(projectId).catch(() => null),
   ]);
   if (!report || !srs) notFound();
+  const aiNotice = report.totalRequirements > 0 ? aiUnavailableNotice(report.unavailableAiChecks) : null;
 
   return (
     <div>
@@ -27,9 +29,9 @@ export default async function QualityPage({
         Advertencias sobre los requisitos extraídos, junto al documento SRS completo. Es solo informativo — no bloquea completar el proyecto ni cambia el documento SRS.
       </p>
 
-      {!report.aiAvailable && report.totalRequirements > 0 && (
+      {aiNotice && (
         <p className="mt-4 text-sm text-slate-500" role="status">
-          Nota: la revisión de vaguedad y posibles duplicados con IA no está disponible en este momento; solo se muestran advertencias de prioridad faltante.
+          {aiNotice}
         </p>
       )}
 
