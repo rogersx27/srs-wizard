@@ -1,5 +1,8 @@
 # SRS Wizard
 
+[![CI](https://github.com/rogersx27/srs-wizard/actions/workflows/ci.yml/badge.svg)](https://github.com/rogersx27/srs-wizard/actions/workflows/ci.yml)
+[![Licencia: MIT](https://img.shields.io/badge/Licencia-MIT-blue.svg)](LICENSE)
+
 Formulario guiado para que los clientes de un desarrollador entreguen sus requerimientos de software en formato de Especificación de Requisitos de Software (ERS), siguiendo el estándar **IEEE 830-1998**.
 
 El desarrollador crea un proyecto por cliente y obtiene una URL única (`/s/[slug]`). El cliente responde un wizard de un paso a la vez, en lenguaje llano, con autosave y un recorrido guiado (`driver.js`). Al finalizar, el desarrollador ve en su dashboard un documento SRS compilado, trazable (IDs `RU/RS/RF/RNF-###`) y priorizado, listo para descargar en Markdown o imprimir.
@@ -81,4 +84,12 @@ docker run --rm srs-wizard-check pnpm lint
 docker run --rm srs-wizard-check pnpm test
 ```
 
-Este repo sigue Gitflow, Conventional Commits y Keep a Changelog. Las reglas completas están en [AGENTS.md](AGENTS.md) y el flujo de trabajo en [CONTRIBUTING.md](CONTRIBUTING.md). Los cambios notables se registran en [CHANGELOG.md](CHANGELOG.md).
+Este repo sigue Gitflow, Conventional Commits y Keep a Changelog. Las reglas completas están en [AGENTS.md](AGENTS.md) y el flujo de trabajo en [CONTRIBUTING.md](CONTRIBUTING.md). Los cambios notables se registran en [CHANGELOG.md](CHANGELOG.md). Al participar en este proyecto aceptas el [Código de Conducta](CODE_OF_CONDUCT.md).
+
+## Seguridad
+
+¿Encontraste una vulnerabilidad? No abras un issue público — sigue el proceso de reporte privado en [SECURITY.md](SECURITY.md).
+
+## Licencia
+
+[MIT](LICENSE) © 2026 Juan Pablo

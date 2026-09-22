@@ -7,6 +7,10 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+
+- Licencia MIT (`LICENSE`), `CODE_OF_CONDUCT.md`, `SECURITY.md` y plantillas de issues (`.github/ISSUE_TEMPLATE/`) para preparar el repo como público.
+
 ## [0.3.0] - 2026-09-22
 
 ### Added
