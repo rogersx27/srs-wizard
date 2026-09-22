@@ -7,9 +7,20 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-22
+
+### Added
+
+- Botón de cerrar sesión en el dashboard.
+
 ### Changed
 
 - Mejorada la accesibilidad del wizard y dashboard: navegación por teclado, foco visible, etiquetas semánticas, progreso anunciado, feedback de autoguardado con reintento, logout y tour contextual.
+- El entorno Docker pasó de un contenedor de desarrollo (bind mount + `next dev`, con hot reload) a una imagen multi-stage de producción (`next build` en el build, `next start` en runtime): arranque más rápido y liviano, sin hot reload. La base de datos SQLite ahora vive en el volumen `db_data` (`/data/app.db`), separada del código.
+
+### Fixed
+
+- `react-markdown` truena `next build` si se renderiza dentro de un Server Component puro (usa hooks internamente); aislado en `MarkdownView`, un Client Component dedicado.
 
 ## [0.1.0] - 2026-09-21
 
@@ -22,5 +33,6 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Vista de impresión y descarga `.md` del SRS compilado.
 - Entorno de desarrollo con Docker Compose (Next.js 16 + Prisma 6 + SQLite), pensado para evitar los límites de ruta de Windows.
 
-[Unreleased]: https://github.com/rogersx27/srs-wizard/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rogersx27/srs-wizard/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rogersx27/srs-wizard/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rogersx27/srs-wizard/releases/tag/v0.1.0

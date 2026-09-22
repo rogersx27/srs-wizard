@@ -11,7 +11,7 @@ El desarrollador crea un proyecto por cliente y obtiene una URL única (`/s/[slu
 - **Tailwind CSS 4**
 - **driver.js** para el tour guiado del wizard
 - Arquitectura por capas: `domain` → `application` → `infrastructure` → `app` (ver estructura abajo)
-- **Docker Compose** para desarrollo local
+- **Docker** (build multi-stage de producción) para correrlo localmente
 
 ## Cómo levantarlo (Docker)
 
@@ -24,17 +24,19 @@ docker compose up --build
 
 Abre [http://localhost:3000](http://localhost:3000). La contraseña del dashboard es la que definiste en `DASHBOARD_PASSWORD`.
 
-> **Nota (Windows):** el `pnpm install` se ejecuta **dentro** del contenedor a propósito — hacerlo en el host puede exceder el límite de ruta de Windows (260 caracteres) por el anidamiento de `node_modules/.pnpm/`.
+`docker compose up` corre la app en **modo producción** (`next start` sobre un build ya compilado), no en modo desarrollo: es más liviano y arranca en milisegundos, pero **no tiene hot reload**. Cada vez que cambies código, vuelve a correr `docker compose up --build` para reconstruir la imagen.
 
-> **Nota (hot reload):** si editas archivos desde el host y no ves el cambio reflejado, Turbopack a veces no detecta cambios a través del bind mount de Docker en Windows. Corre `docker compose restart app`.
+La base de datos SQLite vive en el volumen con nombre `db_data` (montado en `/data` dentro del contenedor), separada del código de la imagen — así persiste entre reconstrucciones y solo se borra si corres `docker compose down -v`.
+
+> **Nota (Windows):** el `pnpm install` y el build de Next.js se ejecutan **dentro** del Dockerfile a propósito — hacerlo en el host puede exceder el límite de ruta de Windows (260 caracteres) por el anidamiento de `node_modules/.pnpm/`.
 
 ### Comandos útiles
 
 ```bash
-docker compose logs -f app          # ver logs del servidor
-docker compose exec app pnpm db:studio   # Prisma Studio
-docker compose restart app          # forzar recompilación
-docker compose down                 # apagar todo
+docker compose logs -f app     # ver logs del servidor
+docker compose up --build      # reconstruir tras un cambio de código
+docker compose down            # apagar (los datos persisten en el volumen db_data)
+docker compose down -v         # apagar y borrar también los datos
 ```
 
 ## Estructura del proyecto
@@ -58,7 +60,7 @@ Ver [.env.example](.env.example):
 
 | Variable | Descripción |
 |---|---|
-| `DATABASE_URL` | Ruta del archivo SQLite (`file:./dev.db`) |
+| `DATABASE_URL` | Ruta del archivo SQLite dentro del contenedor (`file:/data/app.db`, en el volumen persistente) |
 | `DASHBOARD_PASSWORD` | Contraseña compartida para entrar al dashboard |
 | `DASHBOARD_SESSION_SECRET` | Clave para firmar la cookie de sesión (HMAC) |
 
