@@ -12,6 +12,11 @@ const components: Components = {
   ),
 };
 
-export function MarkdownView({ markdown }: { markdown: string }) {
-  return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{markdown}</ReactMarkdown>;
+/** `extraComponents` must be a stable reference; a new object per render remounts the document. */
+export function MarkdownView({ markdown, extraComponents }: { markdown: string; extraComponents?: Components }) {
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={extraComponents ? { ...components, ...extraComponents } : components}>
+      {markdown}
+    </ReactMarkdown>
+  );
 }

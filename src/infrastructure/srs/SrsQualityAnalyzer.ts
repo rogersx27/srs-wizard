@@ -16,6 +16,7 @@ export interface SrsQualityReport {
   findings: QualityFinding[];
   aiAvailable: boolean;
   totalRequirements: number;
+  requirements: TraceableRequirement[];
 }
 
 export class SrsQualityAnalyzer {
@@ -34,6 +35,7 @@ export class SrsQualityAnalyzer {
       findings: [...priorityFindings, ...aiFindings],
       aiAvailable,
       totalRequirements: requirements.length,
+      requirements,
     };
   }
 
