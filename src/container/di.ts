@@ -1,5 +1,6 @@
 import { PrismaProjectRepository } from "@/infrastructure/persistence/prisma/PrismaProjectRepository";
 import { PrismaAnswerRepository } from "@/infrastructure/persistence/prisma/PrismaAnswerRepository";
+import { PrismaAiCacheRepository } from "@/infrastructure/persistence/prisma/PrismaAiCacheRepository";
 import {
   CreateProjectUseCase,
   ListProjectsUseCase,
@@ -24,6 +25,7 @@ import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
 
 const projectRepository = new PrismaProjectRepository();
 const answerRepository = new PrismaAnswerRepository();
+const aiCacheRepository = new PrismaAiCacheRepository();
 
 function createAiAssistant(): IAiAssistant {
   const provider = process.env.AI_PROVIDER?.toLowerCase();
@@ -37,8 +39,8 @@ function createAiAssistant(): IAiAssistant {
 }
 
 const aiAssistant: IAiAssistant = createAiAssistant();
-const srsDocumentGenerator = new SrsDocumentGenerator(undefined, undefined, aiAssistant);
-const srsQualityAnalyzer = new SrsQualityAnalyzer(undefined, aiAssistant);
+const srsDocumentGenerator = new SrsDocumentGenerator(undefined, undefined, aiAssistant, aiCacheRepository);
+const srsQualityAnalyzer = new SrsQualityAnalyzer(undefined, aiAssistant, aiCacheRepository);
 
 export const container = {
   createProject: new CreateProjectUseCase(projectRepository),
