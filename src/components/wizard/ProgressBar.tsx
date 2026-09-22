@@ -7,28 +7,25 @@ export function ProgressBar({
   answered: number;
   total: number;
 }) {
+  const boundedPercent = Number.isFinite(percent) ? Math.min(100, Math.max(0, percent)) : 0;
+
   return (
     <div>
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>Tu progreso</span>
-        <span aria-live="polite">
+        <span aria-live="polite" aria-atomic="true">
           {answered}/{total}
         </span>
       </div>
-      <div
-        className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100"
-        role="progressbar"
+      <progress
+        className="ui-progress mt-1 w-full"
         aria-label="Progreso del cuestionario"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percent}
+        max={100}
+        value={boundedPercent}
         aria-valuetext={`${answered} de ${total} preguntas respondidas`}
       >
-        <div
-          className="h-full rounded-full bg-slate-900 transition-[width] duration-300 ease-out"
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+        {boundedPercent}%
+      </progress>
     </div>
   );
 }

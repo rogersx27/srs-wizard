@@ -1,7 +1,7 @@
-export type SaveStatus = "idle" | "saving" | "saved" | "error";
+import type { AutosaveStatus as SaveStatus } from "./autosaveQueue";
 
 const LABELS: Record<SaveStatus, string> = {
-  idle: "",
+  idle: "Tus respuestas se guardan automáticamente",
   saving: "Guardando...",
   saved: "Guardado",
   error: "No se pudo guardar",
@@ -11,11 +11,9 @@ export function AutosaveIndicator({ status, onRetry }: { status: SaveStatus; onR
   return (
     <div className="flex min-h-6 items-center gap-2 text-xs" role="status" aria-live="polite">
       <span
-        className={`transition-opacity duration-200 ease-out ${
-          status === "idle" ? "opacity-0" : "opacity-100"
-        } ${status === "error" ? "text-red-700" : "text-slate-500"}`}
+        className={status === "error" ? "text-red-700" : "text-slate-600"}
       >
-        {LABELS[status] || "."}
+        {LABELS[status]}
       </span>
       {status === "error" && onRetry && (
         <button

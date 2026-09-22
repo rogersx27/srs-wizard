@@ -1,9 +1,10 @@
 "use client";
 
 import type { WizardQuestion } from "@/wizard-catalog/types";
-import type { RefObject } from "react";
+import { useId, type RefObject } from "react";
 import type { LocalAnswer } from "./types";
 import { PrioritySelector } from "./PrioritySelector";
+import { RequirementListInput } from "./RequirementListInput";
 
 interface StepQuestionProps {
   question: WizardQuestion;
@@ -13,11 +14,12 @@ interface StepQuestionProps {
 }
 
 export function StepQuestion({ question, answer, headingRef, onChange }: StepQuestionProps) {
-  const questionLabelId = `${question.id}-label`;
-  const helpTextId = `${question.id}-help`;
+  const fieldId = useId();
+  const questionLabelId = `${fieldId}-label`;
+  const helpTextId = `${fieldId}-help`;
 
   return (
-    <div className="step-enter rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section aria-labelledby={questionLabelId} className="step-enter min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <h2 ref={headingRef} id={questionLabelId} tabIndex={-1} className="text-lg font-semibold text-slate-900">
         {question.prompt}
       </h2>
@@ -30,27 +32,27 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
       <div className="mt-4">
         {question.kind === "long_text" && (
           <textarea
-            id={question.id}
+            id={fieldId}
             rows={4}
             value={answer.valueText ?? ""}
             placeholder={question.placeholder}
             aria-labelledby={questionLabelId}
             aria-describedby={question.helpText ? helpTextId : undefined}
             onChange={(e) => onChange({ ...answer, valueText: e.target.value })}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+            className="ui-field min-h-32 resize-y"
           />
         )}
 
         {question.kind === "short_text" && (
           <input
-            id={question.id}
+            id={fieldId}
             type="text"
             value={answer.valueText ?? ""}
             placeholder={question.placeholder}
             aria-labelledby={questionLabelId}
             aria-describedby={question.helpText ? helpTextId : undefined}
             onChange={(e) => onChange({ ...answer, valueText: e.target.value })}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+            className="ui-field"
           />
         )}
 
@@ -68,7 +70,7 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
               >
                 <input
                   type="radio"
-                  name={question.id}
+                  name={fieldId}
                   value={option}
                   checked={answer.valueText === option}
                   onChange={() => onChange({ ...answer, valueText: option })}
@@ -83,6 +85,8 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
         {question.kind === "requirement_list" && (
           <RequirementListInput
             items={answer.valueList ?? [""]}
+            label={question.prompt}
+            describedBy={question.helpText ? helpTextId : undefined}
             onChange={(items) => onChange({ ...answer, valueList: items })}
           />
         )}
@@ -91,70 +95,12 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
       {question.isRequirement && (
         <div data-tour-id="priority-selector" className="mt-5">
           <PrioritySelector
-            name={`priority-${question.id}`}
+            name={`priority-${fieldId}`}
             value={answer.priority}
             onChange={(priority) => onChange({ ...answer, priority })}
           />
         </div>
       )}
-    </div>
-  );
-}
-
-function RequirementListInput({
-  items,
-  onChange,
-}: {
-  items: string[];
-  onChange: (items: string[]) => void;
-}) {
-  const list = items.length > 0 ? items : [""];
-
-  function updateItem(index: number, value: string) {
-    const next = [...list];
-    next[index] = value;
-    onChange(next);
-  }
-
-  function addItem() {
-    onChange([...list, ""]);
-  }
-
-  function removeItem(index: number) {
-    const next = list.filter((_, i) => i !== index);
-    onChange(next.length > 0 ? next : [""]);
-  }
-
-  return (
-    <div className="space-y-2">
-      {list.map((item, index) => (
-        <div key={index} className="flex items-center gap-2">
-          <label htmlFor={`${index}-requirement`} className="sr-only">
-            Elemento {index + 1}
-          </label>
-          <input
-            id={`${index}-requirement`}
-            type="text"
-            value={item}
-            onChange={(e) => updateItem(index, e.target.value)}
-            placeholder={`Elemento ${index + 1}`}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-          />
-          {list.length > 1 && (
-            <button
-              type="button"
-              onClick={() => removeItem(index)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-slate-500 transition-[color,background-color] duration-150 ease-out hover:bg-red-50 hover:text-red-700"
-              aria-label={`Eliminar elemento ${index + 1}`}
-            >
-              <span aria-hidden="true">✕</span>
-            </button>
-          )}
-        </div>
-      ))}
-      <button type="button" onClick={addItem} className="text-sm font-medium text-slate-600 hover:text-slate-900">
-        + Agregar otro
-      </button>
-    </div>
+    </section>
   );
 }

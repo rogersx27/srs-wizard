@@ -5,6 +5,7 @@ import { container } from "@/container/di";
 
 export interface CreateProjectActionState {
   error?: string;
+  fieldError?: boolean;
 }
 
 export async function createProjectAction(
@@ -14,7 +15,7 @@ export async function createProjectAction(
   const clientName = String(formData.get("clientName") ?? "").trim();
 
   if (!clientName) {
-    return { error: "Escribe el nombre del cliente o proyecto." };
+    return { error: "Escribe el nombre del cliente o proyecto.", fieldError: true };
   }
 
   let projectId: string;
