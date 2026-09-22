@@ -1,9 +1,15 @@
 import { z } from "zod";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
+import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
 import { withTimeout } from "../ai/withTimeout.ts";
 
 const TIMEOUT_MS = 10_000;
+// Probabilidad mínima que debe dar el modelo de evaluación para marcar un requisito
+// como vago -- por encima de 0.5 para no llenar la revisión de falsos positivos.
+const VAGUENESS_THRESHOLD = 0.7;
+
+type AiCheck = "vagueness" | "duplicate";
 
 export type QualityFindingType = "vagueness" | "duplicate" | "missing_priority";
 
@@ -59,44 +65,109 @@ export function parseAiFindings(raw: string, validIds: ReadonlySet<string>): Qua
   }
 }
 
-function buildPrompt(requirements: TraceableRequirement[]): string {
+const CHECK_DESCRIPTIONS: Record<AiCheck, string> = {
+  vagueness:
+    '"vagueness": el texto usa cualidades subjetivas sin una métrica verificable (ej. "rápido", "fácil", ' +
+    '"seguro", "intuitivo") sin especificar cómo se mediría.',
+  duplicate:
+    '"duplicate": dos o más requisitos (aunque estén en categorías distintas) expresan esencialmente la ' +
+    "misma necesidad.",
+};
+
+function buildPrompt(requirements: TraceableRequirement[], checks: AiCheck[]): string {
   const list = requirements.map((requirement) => `${requirement.id} | ${requirement.category} | ${requirement.text}`).join("\n");
+  const problems = checks.map((check, index) => `${index + 1}. ${CHECK_DESCRIPTIONS[check]}`).join("\n");
+  const types = checks.map((check) => `"${check}"`).join(" | ");
 
   return (
     "Eres un analista de requisitos de software revisando una Especificación de Requisitos de Software " +
     "(IEEE 830). A continuación tienes una lista de requisitos, cada uno con su ID, categoría y texto. " +
-    "Identifica dos tipos de problemas:\n\n" +
-    '1. "vagueness": el texto usa cualidades subjetivas sin una métrica verificable (ej. "rápido", "fácil", ' +
-    '"seguro", "intuitivo") sin especificar cómo se mediría.\n' +
-    '2. "duplicate": dos o más requisitos (aunque estén en categorías distintas) expresan esencialmente la ' +
-    "misma necesidad.\n\n" +
+    `Identifica ${checks.length === 1 ? "este tipo de problema" : "estos tipos de problemas"}:\n\n` +
+    `${problems}\n\n` +
     "Usa ÚNICAMENTE los IDs de la lista de abajo, nunca inventes requisitos ni IDs que no existan. Si no " +
     "encuentras ningún problema, responde con un arreglo vacío.\n\n" +
     "Responde SOLO con un arreglo JSON válido, sin explicación adicional ni cercado de código, con este " +
     "formato exacto:\n" +
-    '[{"type": "vagueness" | "duplicate", "requirementIds": ["ID1", "ID2"], "message": "explicación breve en español"}]\n\n' +
+    `[{"type": ${types}, "requirementIds": ["ID1", "ID2"], "message": "explicación breve en español"}]\n\n` +
     `Requisitos (ID | categoría | texto):\n${list}`
   );
 }
 
+async function findWithAssistant(
+  assistant: IAiAssistant,
+  requirements: TraceableRequirement[],
+  checks: AiCheck[]
+): Promise<QualityFinding[]> {
+  const validIds = new Set(requirements.map((requirement) => requirement.id));
+  const raw = await withTimeout(
+    assistant.complete(buildPrompt(requirements, checks), { maxOutputTokens: 1024 }),
+    TIMEOUT_MS
+  );
+  return parseAiFindings(raw, validIds).filter((finding) => checks.some((check) => check === finding.type));
+}
+
+/**
+ * Detecta vaguedad con un modelo de evaluación (ej. Jev): una pregunta de sí/no por
+ * requisito, todas en una sola llamada. El modelo no redacta texto, así que el
+ * mensaje de cada advertencia es fijo.
+ */
+export async function findVaguenessWithEvaluator(
+  evaluator: IAiEvaluator,
+  requirements: TraceableRequirement[]
+): Promise<QualityFinding[]> {
+  const state = requirements.map(({ id, category, text }) => ({ id, category, text }));
+  const questions = Object.fromEntries(
+    requirements.map((requirement) => [
+      requirement.id,
+      {
+        instructions:
+          `¿El requisito ${requirement.id} usa cualidades subjetivas (ej. "rápido", "fácil", "seguro", ` +
+          '"intuitivo") sin especificar una métrica verificable de cómo se mediría?',
+      },
+    ])
+  );
+
+  const probabilities = await withTimeout(evaluator.evaluateBooleans(state, questions), TIMEOUT_MS);
+
+  return requirements
+    .filter((requirement) => (probabilities[requirement.id] ?? 0) >= VAGUENESS_THRESHOLD)
+    .map((requirement) => ({
+      type: "vagueness" as const,
+      message: `El requisito ${requirement.id} usa cualidades subjetivas sin una métrica verificable.`,
+      requirementIds: [requirement.id],
+    }));
+}
+
+/**
+ * Con `evaluator`, la vaguedad la juzga el modelo de evaluación y el asistente solo
+ * busca duplicados (en paralelo). Si cualquiera de los dos falla, se muestran los
+ * hallazgos que sí llegaron pero `aiAvailable` queda en false para no cachear un
+ * resultado incompleto.
+ */
 export async function analyzeWithAi(
   assistant: IAiAssistant,
-  requirements: TraceableRequirement[]
+  requirements: TraceableRequirement[],
+  evaluator?: IAiEvaluator
 ): Promise<QualityAnalysisResult> {
   if (requirements.length === 0) {
     return { findings: [], aiAvailable: false };
   }
 
-  const validIds = new Set(requirements.map((requirement) => requirement.id));
+  const tasks = evaluator
+    ? [findVaguenessWithEvaluator(evaluator, requirements), findWithAssistant(assistant, requirements, ["duplicate"])]
+    : [findWithAssistant(assistant, requirements, ["vagueness", "duplicate"])];
 
-  try {
-    const raw = await withTimeout(
-      assistant.complete(buildPrompt(requirements), { maxOutputTokens: 1024 }),
-      TIMEOUT_MS
-    );
-    return { findings: parseAiFindings(raw, validIds), aiAvailable: true };
-  } catch (error) {
-    console.error("[qualityAnalysis] no se pudo completar el análisis con IA:", error);
-    return { findings: [], aiAvailable: false };
+  const results = await Promise.allSettled(tasks);
+  const findings: QualityFinding[] = [];
+  let aiAvailable = true;
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      findings.push(...result.value);
+    } else {
+      aiAvailable = false;
+      console.error("[qualityAnalysis] no se pudo completar el análisis con IA:", result.reason);
+    }
   }
+
+  return { findings, aiAvailable };
 }

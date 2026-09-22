@@ -1,5 +1,6 @@
 import type { Answer } from "@/domain/entities/Answer";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
+import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 import type { IAiCacheRepository } from "@/domain/repositories/IAiCacheRepository";
 import { WIZARD_CATALOG } from "@/wizard-catalog/wizardCatalog";
 import { RequirementIdGenerator } from "./RequirementIdGenerator";
@@ -23,7 +24,8 @@ export class SrsQualityAnalyzer {
   constructor(
     private readonly idGenerator: RequirementIdGenerator = new RequirementIdGenerator(),
     private readonly aiAssistant: IAiAssistant = new NullAiAssistant(),
-    private readonly aiCache: IAiCacheRepository = new PrismaAiCacheRepository()
+    private readonly aiCache: IAiCacheRepository = new PrismaAiCacheRepository(),
+    private readonly aiEvaluator?: IAiEvaluator
   ) {}
 
   async analyze(projectId: string, answers: Answer[]): Promise<SrsQualityReport> {
@@ -55,7 +57,7 @@ export class SrsQualityAnalyzer {
       CACHE_KIND,
       inputHash,
       async () => {
-        const result = await analyzeWithAi(this.aiAssistant, requirements);
+        const result = await analyzeWithAi(this.aiAssistant, requirements, this.aiEvaluator);
         // Igual que en SrsDocumentGenerator: solo se cachea si la IA realmente
         // respondió, para que un fallo (o falta de proveedor) se reintente en la
         // próxima consulta.
