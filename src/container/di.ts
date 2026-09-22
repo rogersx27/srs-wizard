@@ -15,13 +15,26 @@ import {
 import { GenerateSrsDocumentUseCase } from "@/application/use-cases/GenerateSrsDocumentUseCase";
 import { SrsDocumentGenerator } from "@/infrastructure/srs/SrsDocumentGenerator";
 import { GeminiAiAssistant } from "@/infrastructure/ai/GeminiAiAssistant";
+import { AnthropicAiAssistant } from "@/infrastructure/ai/AnthropicAiAssistant";
+import { OpenAiAssistant } from "@/infrastructure/ai/OpenAiAssistant";
 import { NullAiAssistant } from "@/infrastructure/ai/NullAiAssistant";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
 
 const projectRepository = new PrismaProjectRepository();
 const answerRepository = new PrismaAnswerRepository();
 
-const aiAssistant: IAiAssistant = process.env.GEMINI_API_KEY ? new GeminiAiAssistant() : new NullAiAssistant();
+function createAiAssistant(): IAiAssistant {
+  const provider = process.env.AI_PROVIDER?.toLowerCase();
+  if (provider === "anthropic") return new AnthropicAiAssistant();
+  if (provider === "openai") return new OpenAiAssistant();
+  if (provider === "gemini") return new GeminiAiAssistant();
+  if (process.env.GEMINI_API_KEY) return new GeminiAiAssistant();
+  if (process.env.ANTHROPIC_API_KEY) return new AnthropicAiAssistant();
+  if (process.env.OPENAI_API_KEY) return new OpenAiAssistant();
+  return new NullAiAssistant();
+}
+
+const aiAssistant: IAiAssistant = createAiAssistant();
 const srsDocumentGenerator = new SrsDocumentGenerator(undefined, undefined, aiAssistant);
 
 export const container = {
