@@ -19,7 +19,7 @@ export class GenerateSrsDocumentUseCase {
     if (!project) throw new Error("Proyecto no encontrado.");
 
     const answers = await this.answers.findByProjectId(projectId);
-    const markdown = this.generator.generate(project, answers);
+    const markdown = await this.generator.generate(project, answers);
 
     return { markdown, fileName: `SRS-${project.slug}.md` };
   }

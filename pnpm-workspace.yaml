@@ -1,13 +1,17 @@
 allowBuilds:
+  '@google/genai': true
   '@prisma/client': true
   '@prisma/engines': true
   prisma: true
+  protobufjs: true
   unrs-resolver: true
 onlyBuiltDependencies:
+  - '@google/genai'
   - '@prisma/client'
   - '@prisma/engines'
   - prisma
   - esbuild
   - msgpackr-extract
+  - protobufjs
   - workerd
   - sharp
