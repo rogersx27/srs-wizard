@@ -13,7 +13,9 @@ import {
   ComputeWizardProgressUseCase,
 } from "@/application/use-cases/AnswerUseCases";
 import { GenerateSrsDocumentUseCase } from "@/application/use-cases/GenerateSrsDocumentUseCase";
+import { AnalyzeSrsQualityUseCase } from "@/application/use-cases/AnalyzeSrsQualityUseCase";
 import { SrsDocumentGenerator } from "@/infrastructure/srs/SrsDocumentGenerator";
+import { SrsQualityAnalyzer } from "@/infrastructure/srs/SrsQualityAnalyzer";
 import { GeminiAiAssistant } from "@/infrastructure/ai/GeminiAiAssistant";
 import { AnthropicAiAssistant } from "@/infrastructure/ai/AnthropicAiAssistant";
 import { OpenAiAssistant } from "@/infrastructure/ai/OpenAiAssistant";
@@ -36,6 +38,7 @@ function createAiAssistant(): IAiAssistant {
 
 const aiAssistant: IAiAssistant = createAiAssistant();
 const srsDocumentGenerator = new SrsDocumentGenerator(undefined, undefined, aiAssistant);
+const srsQualityAnalyzer = new SrsQualityAnalyzer(undefined, aiAssistant);
 
 export const container = {
   createProject: new CreateProjectUseCase(projectRepository),
@@ -47,4 +50,5 @@ export const container = {
   getAnswersForProject: new GetAnswersForProjectUseCase(answerRepository),
   computeWizardProgress: new ComputeWizardProgressUseCase(answerRepository),
   generateSrsDocument: new GenerateSrsDocumentUseCase(projectRepository, answerRepository, srsDocumentGenerator),
+  analyzeSrsQuality: new AnalyzeSrsQualityUseCase(projectRepository, answerRepository, srsQualityAnalyzer),
 };

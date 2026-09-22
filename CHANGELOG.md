@@ -10,6 +10,7 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 ### Added
 
 - Redacción asistida por IA (opcional) para la Introducción y Descripción General del SRS generado, con Gemini (capa gratuita), Anthropic u OpenAI como proveedor (`AI_PROVIDER`). Sin ninguna clave configurada, o si el proveedor falla, el documento muestra el texto tal como lo escribió el cliente sin interrumpir la generación. Puerto agnóstico de proveedor (`IAiAssistant`) para poder cambiar de proveedor de IA sin tocar el dominio ni la aplicación.
+- Revisión de calidad de requisitos (`/dashboard/[projectId]/quality`): advertencias de vaguedad y posibles duplicados detectadas por IA, más requisitos sin prioridad asignada (chequeo determinista, sin IA). Es solo informativo — no bloquea completar el proyecto ni modifica el documento SRS. El chequeo de prioridad sigue funcionando aunque no haya ningún proveedor de IA configurado.
 
 ## [0.3.1] - 2026-09-22
 

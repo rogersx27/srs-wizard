@@ -47,12 +47,18 @@ export default async function ProjectDetailPage({
         />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap gap-2">
         <Link
           href={`/dashboard/${project.id}/srs`}
           className="ui-button ui-button-primary"
         >
           Ver SRS compilado
+        </Link>
+        <Link
+          href={`/dashboard/${project.id}/quality`}
+          className="ui-button ui-button-secondary"
+        >
+          Revisar calidad (IA)
         </Link>
       </div>
     </div>
