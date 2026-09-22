@@ -88,7 +88,9 @@ Este proyecto usa [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). T
 ## Reglas específicas de este proyecto (contexto para agentes)
 
 - **Prisma está fijado en la línea 6.x** (`6.19.3`). No actualizar a Prisma 7+ sin una decisión explícita: esa versión mayor cambió `datasource.url`, requiere adaptadores nativos (`@prisma/adapter-*`) y un `prisma.config.ts` — rompe este proyecto tal como está estructurado.
-- **`pnpm install` corre dentro de Docker**, nunca en el host de Windows: la ruta anidada de `node_modules/.pnpm/` puede exceder el límite de 260 caracteres de Windows.
+- **`pnpm install` y `next build` corren dentro del `Dockerfile`**, nunca en el host de Windows: la ruta anidada de `node_modules/.pnpm/` puede exceder el límite de 260 caracteres de Windows.
 - Next.js usa **`proxy.ts`** (no `middleware.ts` — deprecado en Next 16) para proteger `/dashboard/*`.
 - El catálogo de preguntas del wizard vive hardcodeado en `src/wizard-catalog/wizardCatalog.ts`, no en base de datos: es una decisión de diseño, no un descuido.
-- Si editas código desde el host y no ves el cambio en `http://localhost:3000`, Turbopack puede no detectar el bind mount de Docker en Windows — correr `docker compose restart app`.
+- `docker-compose.yml` corre la app en **modo producción** (`next start`, sin bind mount de código): no hay hot reload, cada cambio de código requiere `docker compose up --build`. La base de datos vive en el volumen `db_data` (`/data/app.db`), separada del código para que sobreviva a las reconstrucciones.
+- Si `docker compose up --build` falla con errores internos de React del tipo `Cannot read properties of null (reading 'useContext')` durante `next build`, no es un bug de código: fue causado por volúmenes de `node_modules`/`.next` corruptos de una configuración anterior basada en bind mount. El Dockerfile de producción actual (multi-stage, sin bind mount) no debería reproducirlo; si reaparece, `docker compose down -v` y reconstruir desde cero.
+- El binario de Prisma se invoca directo (`./node_modules/.bin/prisma`) en el `CMD` del Dockerfile, no vía `pnpm exec`: `pnpm exec` dispara una revalidación de dependencias que puede volver a pedir aprobación de build scripts (`ERR_PNPM_IGNORED_BUILDS`) en tiempo de ejecución.

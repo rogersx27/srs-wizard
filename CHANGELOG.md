@@ -10,6 +10,7 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 ### Changed
 
 - Mejorada la accesibilidad del wizard y dashboard: navegación por teclado, foco visible, etiquetas semánticas, progreso anunciado, feedback de autoguardado con reintento, logout y tour contextual.
+- El entorno Docker pasó de un contenedor de desarrollo (bind mount + `next dev`, con hot reload) a una imagen multi-stage de producción (`next build` en el build, `next start` en runtime): arranque más rápido y liviano, sin hot reload. La base de datos SQLite ahora vive en el volumen `db_data` (`/data/app.db`), separada del código.
 
 ## [0.1.0] - 2026-09-21
 

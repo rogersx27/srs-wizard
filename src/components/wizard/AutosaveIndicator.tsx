@@ -1,0 +1,31 @@
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+const LABELS: Record<SaveStatus, string> = {
+  idle: "",
+  saving: "Guardando...",
+  saved: "Guardado",
+  error: "No se pudo guardar",
+};
+
+export function AutosaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry?: () => void }) {
+  return (
+    <div className="flex min-h-6 items-center gap-2 text-xs" role="status" aria-live="polite">
+      <span
+        className={`transition-opacity duration-200 ease-out ${
+          status === "idle" ? "opacity-0" : "opacity-100"
+        } ${status === "error" ? "text-red-700" : "text-slate-500"}`}
+      >
+        {LABELS[status] || "."}
+      </span>
+      {status === "error" && onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="min-h-11 rounded-md px-2 font-medium text-red-800 underline underline-offset-2 hover:bg-red-50"
+        >
+          Reintentar
+        </button>
+      )}
+    </div>
+  );
+}
