@@ -73,10 +73,11 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
             {question.options?.map((option) => (
               <label
                 key={option}
-                className={`flex min-h-11 cursor-pointer items-center rounded-lg border px-3 py-2 text-left text-sm transition-[background-color,color,border-color] duration-150 ease-out focus-within:ring-2 focus-within:ring-slate-900 focus-within:ring-offset-2 ${answer.valueText === option
+                className={`flex min-h-11 cursor-pointer items-center rounded-lg border px-3 py-2 text-left text-sm transition-[background-color,color,border-color] duration-150 ease-out focus-within:ring-2 focus-within:ring-slate-900 focus-within:ring-offset-2 ${
+                  answer.valueText === option
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-slate-300 text-slate-700 hover:bg-slate-50"
-                  }`}
+                }`}
               >
                 <input
                   type="radio"
