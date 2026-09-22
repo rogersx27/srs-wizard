@@ -7,6 +7,10 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+
+- Redacción asistida por IA (Gemini, capa gratuita, opcional) para la Introducción y Descripción General del SRS generado. Sin `GEMINI_API_KEY` configurada, o si el proveedor falla, el documento muestra el texto tal como lo escribió el cliente sin interrumpir la generación. Puerto agnóstico de proveedor (`IAiAssistant`) para poder cambiar de proveedor de IA sin tocar el dominio ni la aplicación.
+
 ## [0.3.1] - 2026-09-22
 
 ### Added

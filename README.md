@@ -66,6 +66,8 @@ Ver [.env.example](.env.example):
 | `DATABASE_URL` | Ruta del archivo SQLite dentro del contenedor (`file:/data/app.db`, en el volumen persistente) |
 | `DASHBOARD_PASSWORD` | Contraseña compartida para entrar al dashboard |
 | `DASHBOARD_SESSION_SECRET` | Clave para firmar la cookie de sesión (HMAC) |
+| `GEMINI_API_KEY` | Opcional. Habilita la redacción asistida por IA (Gemini, capa gratuita) de la Introducción y Descripción General del SRS. Sin esta clave, el documento usa el texto tal como lo escribió el cliente — el wizard y la generación del SRS funcionan igual sin ella. Clave gratuita en [Google AI Studio](https://aistudio.google.com/apikey) |
+| `GEMINI_MODEL` | Opcional. Modelo de Gemini a usar (default `gemini-flash-latest`) |
 
 ## Contribuir
 
