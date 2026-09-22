@@ -14,8 +14,8 @@ interface Snapshot {
 function createStore(projectId: string, initialAnswers: AnswerProps[], questionIds: ReadonlySet<string>) {
   const storageKey = `srs-wizard-answers-${projectId}`;
   const initialSnapshot: Snapshot = {
-    answers: Object.fromEntries(initialAnswers.map(({ questionId, valueText, valueList, priority }) => [
-      questionId, { valueText, valueList, priority },
+    answers: Object.fromEntries(initialAnswers.map(({ questionId, valueText, valueList, priority, itemPriorities }) => [
+      questionId, { valueText, valueList, priority, itemPriorities },
     ])),
     status: "idle",
   };
@@ -28,7 +28,7 @@ function createStore(projectId: string, initialAnswers: AnswerProps[], questionI
       const response = await fetch("/api/answers", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, questionId, valueText: answer.valueText, valueList: answer.valueList, priority: answer.priority }),
+        body: JSON.stringify({ projectId, questionId, ...answer }),
       });
       if (!response.ok) throw new Error("save failed");
     },

@@ -28,7 +28,8 @@ model Project {
   updatedAt   DateTime      @updatedAt
   completedAt DateTime?
 
-  answers Answer[]
+  answers  Answer[]
+  aiCaches AiCache[]
 
   @@index([status])
 }
@@ -40,10 +41,30 @@ model Answer {
   valueText  String?
   valueJson  String?
   priority   Priority?
+  itemPrioritiesJson String?
   updatedAt  DateTime  @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, questionId])
+  @@index([projectId])
+}
+
+// Resultados de IA (narrativa del SRS, hallazgos de calidad) cacheados por proyecto.
+// inputHash captura el contenido que generó el resultado; si cambia, se recalcula.
+// Solo se escribe cuando la IA respondió con éxito -- un fallback nunca se cachea,
+// para poder reintentar la próxima vez que se consulte.
+model AiCache {
+  id        String   @id @default(cuid())
+  projectId String
+  kind      String
+  inputHash String
+  payload   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, kind])
   @@index([projectId])
 }

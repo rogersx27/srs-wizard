@@ -1,7 +1,7 @@
 import type { Project } from "@/domain/entities/Project";
-import type { Answer } from "@/domain/entities/Answer";
-import { IEEE830_LABELS, IEEE830_REQUIREMENT_ORDER } from "@/wizard-catalog/ieee830Mapping";
+import { IEEE830_LABELS, IEEE830_REQUIREMENT_ORDER } from "../../wizard-catalog/ieee830Mapping.ts";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
+import type { AnswerNote } from "./answerNotes";
 
 const PRIORITY_LABEL: Record<string, string> = {
   ESSENTIAL: "Esencial",
@@ -9,17 +9,24 @@ const PRIORITY_LABEL: Record<string, string> = {
   OPTIONAL: "Opcional",
 };
 
+export interface SrsNarrative {
+  introduction: string;
+  userDescription: string;
+  /** True when the AI rewrite was attempted for at least one section but failed or is unavailable. */
+  aiDegraded: boolean;
+}
+
 export interface SrsTemplateInput {
   project: Project;
-  answers: Answer[];
+  narrative: SrsNarrative;
   requirements: TraceableRequirement[];
   generatedAt: Date;
+  answerNotes?: AnswerNote[];
 }
 
 export class SrsMarkdownTemplate {
   render(input: SrsTemplateInput): string {
-    const { project, answers, requirements, generatedAt } = input;
-    const byQuestionId = new Map(answers.map((answer) => [answer.questionId, answer]));
+    const { project, narrative, requirements, generatedAt } = input;
 
     const lines: string[] = [];
 
@@ -31,18 +38,27 @@ export class SrsMarkdownTemplate {
     lines.push(`**Estándar de referencia:** IEEE 830-1998`, ``);
 
     lines.push(`## 1. Introducción`, ``);
-    lines.push(this.textOr(byQuestionId.get("contexto-pitch"), "No especificado."), ``);
+    lines.push(narrative.introduction, ``);
 
     lines.push(`## 2. Descripción General`, ``);
-    lines.push(this.textOr(byQuestionId.get("contexto-usuarios"), "No especificado."), ``);
+    lines.push(narrative.userDescription, ``);
+
+    if (narrative.aiDegraded) {
+      lines.push(
+        `_Nota: la redacción asistida por IA no está disponible en este momento; el texto de estas secciones se muestra tal como lo escribió el cliente._`,
+        ``
+      );
+    }
 
     let sectionNumber = 3;
     for (const category of IEEE830_REQUIREMENT_ORDER) {
       lines.push(`## ${sectionNumber}. ${IEEE830_LABELS[category]}`, ``);
+      const notes = input.answerNotes?.filter((note) => note.category === category) ?? [];
+      for (const note of notes) lines.push(note.text, ``);
 
       const rows = requirements.filter((requirement) => requirement.category === category);
       if (rows.length === 0) {
-        lines.push(`_No especificado._`);
+        if (notes.length === 0) lines.push(`_No especificado._`);
       } else {
         lines.push(`| ID | Requisito | Prioridad |`);
         lines.push(`|----|-----------|-----------|`);
@@ -62,11 +78,6 @@ export class SrsMarkdownTemplate {
     );
 
     return lines.join("\n");
-  }
-
-  private textOr(answer: Answer | undefined, fallback: string): string {
-    if (!answer || answer.isEmpty() || !answer.valueText) return fallback;
-    return answer.valueText;
   }
 
   private escapeCell(text: string): string {

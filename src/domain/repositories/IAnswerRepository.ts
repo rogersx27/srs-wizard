@@ -6,6 +6,7 @@ export interface UpsertAnswerInput {
   valueText?: string | null;
   valueList?: string[] | null;
   priority?: Priority | null;
+  itemPriorities?: (Priority | null)[] | null;
 }
 
 export interface IAnswerRepository {

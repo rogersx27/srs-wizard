@@ -1,4 +1,5 @@
 import type { WizardSection } from "./types";
+import { PROJECT_GUIDE, USERS_GUIDE } from "./writingGuides.ts";
 
 export const WIZARD_CATALOG: WizardSection[] = [
   {
@@ -9,6 +10,7 @@ export const WIZARD_CATALOG: WizardSection[] = [
     questions: [
       {
         id: "contexto-pitch",
+        writingGuide: PROJECT_GUIDE,
         prompt: "En pocas palabras, ¿de qué se trata tu proyecto?",
         helpText: "Imagina que se lo explicas a un amigo en 30 segundos.",
         placeholder: "Ej: Una app para que mis clientes agenden citas sin llamarme por WhatsApp.",
@@ -18,6 +20,7 @@ export const WIZARD_CATALOG: WizardSection[] = [
       },
       {
         id: "contexto-usuarios",
+        writingGuide: USERS_GUIDE,
         prompt: "¿Quién va a usar esto principalmente?",
         helpText: "Puedes mencionar varios tipos de usuario si aplica.",
         placeholder: "Ej: Mis clientes finales y yo como administrador.",
@@ -36,7 +39,7 @@ export const WIZARD_CATALOG: WizardSection[] = [
       {
         id: "usuario-necesidades",
         prompt: "¿Qué necesitas poder hacer tú (o tus usuarios) con este sistema?",
-        helpText: "Agrega una necesidad por línea. Ejemplo: 'Quiero ver mis citas del día'.",
+        helpText: "Escribe una necesidad y pulsa Enter para agregar otra. Elige la importancia de cada una. Ej: 'Quiero ver mis citas del día'.",
         kind: "requirement_list",
         isRequirement: true,
         ieee830Category: "USER",
@@ -52,7 +55,9 @@ export const WIZARD_CATALOG: WizardSection[] = [
       {
         id: "sistema-integraciones",
         prompt: "¿Hay algo con lo que el sistema deba conectarse?",
-        helpText: "Ej: WhatsApp, una pasarela de pagos, tu sistema de inventario actual. Si no hay ninguna, puedes dejarlo en blanco.",
+        helpText: "Ej: WhatsApp, una pasarela de pagos o tu inventario actual. Agrega cada conexión con Enter o indica que no necesitas ninguna.",
+        emptyAnswerLabel: "No necesito integraciones por ahora",
+        emptyAnswerNote: "El cliente indicó que por ahora no se requieren integraciones.",
         kind: "requirement_list",
         isRequirement: true,
         ieee830Category: "SYSTEM",
@@ -76,7 +81,21 @@ export const WIZARD_CATALOG: WizardSection[] = [
       {
         id: "funcional-caracteristicas",
         prompt: "Lista las funcionalidades principales que necesitas",
-        helpText: "Una por línea. Ej: 'Permitir agendar una cita', 'Enviar recordatorio por correo'.",
+        helpText: "Elige las ideas que te sirvan, ajústalas a tu negocio o escribe tus propias funcionalidades. Define la importancia de cada una.",
+        suggestions: [
+          "Registrar y consultar clientes",
+          "Gestionar pedidos y ventas",
+          "Controlar inventario de productos",
+          "Agendar citas o reservas",
+          "Registrar pagos y gastos",
+          "Enviar recordatorios y notificaciones",
+          "Consultar reportes del negocio",
+          "Asignar tareas y hacer seguimiento",
+          "Administrar usuarios y permisos",
+          "Buscar y filtrar información",
+          "Exportar información a Excel o PDF",
+          "Guardar y consultar documentos",
+        ],
         kind: "requirement_list",
         isRequirement: true,
         ieee830Category: "FUNCTIONAL",
@@ -92,8 +111,20 @@ export const WIZARD_CATALOG: WizardSection[] = [
       {
         id: "nofuncional-cualidades",
         prompt: "¿Qué es importante para ti en cuanto a velocidad, seguridad o facilidad de uso?",
-        helpText: "Ej: 'Debe cargar rápido incluso con mala señal', 'Solo el administrador puede ver los pagos'.",
-        kind: "requirement_list",
+        helpText: "Marca todas las opciones que sean importantes para tu negocio. Puedes elegir varias y dar a cada una su propia importancia.",
+        kind: "multiple_choice",
+        options: [
+          "Que las pantallas carguen rápido",
+          "Que funcione bien con una conexión lenta",
+          "Que proteja los datos del negocio y de los clientes",
+          "Que cada persona vea solo lo que le corresponde según su rol",
+          "Que haga copias de seguridad para recuperar la información",
+          "Que sea fácil de aprender y usar",
+          "Que sea accesible para personas con distintas capacidades",
+          "Que esté disponible cuando lo necesitemos",
+          "Que siga funcionando bien al crecer el negocio",
+          "Que pida confirmación antes de borrar información importante",
+        ],
         isRequirement: true,
         ieee830Category: "NON_FUNCTIONAL",
       },

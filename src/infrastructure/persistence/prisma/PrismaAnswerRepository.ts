@@ -7,6 +7,7 @@ export class PrismaAnswerRepository implements IAnswerRepository {
   async upsert(input: UpsertAnswerInput): Promise<Answer> {
     const valueJson =
       input.valueList !== undefined && input.valueList !== null ? JSON.stringify(input.valueList) : null;
+    const itemPrioritiesJson = input.itemPriorities ? JSON.stringify(input.itemPriorities) : null;
 
     const record = await prisma.answer.upsert({
       where: {
@@ -20,11 +21,13 @@ export class PrismaAnswerRepository implements IAnswerRepository {
         questionId: input.questionId,
         valueText: input.valueText ?? null,
         valueJson,
+        itemPrioritiesJson,
         priority: input.priority ?? null,
       },
       update: {
         valueText: input.valueText ?? null,
         valueJson,
+        itemPrioritiesJson,
         priority: input.priority ?? null,
       },
     });

@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { container } from "@/container/di";
-
-const bodySchema = z.object({
-  projectId: z.string().min(1),
-  questionId: z.string().min(1),
-  valueText: z.string().nullable().optional(),
-  valueList: z.array(z.string()).nullable().optional(),
-  priority: z.enum(["ESSENTIAL", "CONDITIONAL", "OPTIONAL"]).nullable().optional(),
-});
+import { answerBodySchema } from "./schema";
 
 export async function PATCH(request: Request) {
   const json = await request.json().catch(() => null);
-  const parsed = bodySchema.safeParse(json);
+  const parsed = answerBodySchema.safeParse(json);
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Datos inválidos." }, { status: 400 });

@@ -13,14 +13,16 @@ export function PrioritySelector({
   value,
   onChange,
   name,
+  label = "¿Qué tan importante es esto?",
 }: {
   value: Priority | null;
   onChange: (value: Priority) => void;
   name: string;
+  label?: string;
 }) {
   return (
     <fieldset>
-      <legend className="text-xs font-medium uppercase tracking-wide text-slate-500">¿Qué tan importante es esto?</legend>
+      <legend className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</legend>
       <div className="mt-2 flex flex-wrap gap-2">
         {OPTIONS.map((option) => (
           <label

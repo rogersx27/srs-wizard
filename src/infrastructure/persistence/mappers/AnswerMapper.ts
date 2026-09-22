@@ -1,5 +1,6 @@
 import type { Answer as PrismaAnswer } from "@prisma/client";
 import { Answer } from "@/domain/entities/Answer";
+import { parseItemPriorities } from "./parseItemPriorities";
 
 export class AnswerMapper {
   static toDomain(record: PrismaAnswer): Answer {
@@ -21,6 +22,7 @@ export class AnswerMapper {
       valueText: record.valueText,
       valueList,
       priority: record.priority,
+      itemPriorities: parseItemPriorities(record.itemPrioritiesJson, valueList?.length ?? 0),
       updatedAt: record.updatedAt,
     });
   }
