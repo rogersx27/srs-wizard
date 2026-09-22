@@ -10,6 +10,7 @@ import { PrismaAiCacheRepository } from "@/infrastructure/persistence/prisma/Pri
 import { hashContent } from "@/infrastructure/ai/contentHash";
 import { withCache } from "@/infrastructure/ai/cachedCompute";
 import { resolveNarrativeSection } from "./narrativeRewriter";
+import { collectAnswerNotes } from "./answerNotes";
 
 const CACHE_KIND = "srs_narrative";
 
@@ -31,7 +32,13 @@ export class SrsDocumentGenerator {
       byQuestionId.get("contexto-usuarios")
     );
 
-    return this.template.render({ project, requirements, narrative, generatedAt: new Date() });
+    return this.template.render({
+      project,
+      requirements,
+      narrative,
+      generatedAt: new Date(),
+      answerNotes: collectAnswerNotes(WIZARD_CATALOG, answers),
+    });
   }
 
   private async resolveNarrative(

@@ -41,6 +41,7 @@ model Answer {
   valueText  String?
   valueJson  String?
   priority   Priority?
+  itemPrioritiesJson String?
   updatedAt  DateTime  @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)

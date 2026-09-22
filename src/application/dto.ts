@@ -10,4 +10,5 @@ export interface SaveAnswerDTO {
   valueText?: string | null;
   valueList?: string[] | null;
   priority?: Priority | null;
+  itemPriorities?: (Priority | null)[] | null;
 }

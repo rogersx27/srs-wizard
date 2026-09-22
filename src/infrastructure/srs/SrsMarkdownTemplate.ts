@@ -1,6 +1,7 @@
 import type { Project } from "@/domain/entities/Project";
-import { IEEE830_LABELS, IEEE830_REQUIREMENT_ORDER } from "@/wizard-catalog/ieee830Mapping";
+import { IEEE830_LABELS, IEEE830_REQUIREMENT_ORDER } from "../../wizard-catalog/ieee830Mapping.ts";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
+import type { AnswerNote } from "./answerNotes";
 
 const PRIORITY_LABEL: Record<string, string> = {
   ESSENTIAL: "Esencial",
@@ -20,6 +21,7 @@ export interface SrsTemplateInput {
   narrative: SrsNarrative;
   requirements: TraceableRequirement[];
   generatedAt: Date;
+  answerNotes?: AnswerNote[];
 }
 
 export class SrsMarkdownTemplate {
@@ -51,10 +53,12 @@ export class SrsMarkdownTemplate {
     let sectionNumber = 3;
     for (const category of IEEE830_REQUIREMENT_ORDER) {
       lines.push(`## ${sectionNumber}. ${IEEE830_LABELS[category]}`, ``);
+      const notes = input.answerNotes?.filter((note) => note.category === category) ?? [];
+      for (const note of notes) lines.push(note.text, ``);
 
       const rows = requirements.filter((requirement) => requirement.category === category);
       if (rows.length === 0) {
-        lines.push(`_No especificado._`);
+        if (notes.length === 0) lines.push(`_No especificado._`);
       } else {
         lines.push(`| ID | Requisito | Prioridad |`);
         lines.push(`|----|-----------|-----------|`);
