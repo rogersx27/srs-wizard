@@ -14,12 +14,13 @@ export function WizardNavButtons({
   onFinish: () => void;
 }) {
   return (
-    <div className="flex gap-2">
+    <nav aria-label="Navegación del cuestionario" className="flex gap-2">
       {canGoBack && (
         <button
           type="button"
           onClick={onBack}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-[transform,background-color] duration-150 ease-out hover:bg-slate-50 active:scale-[0.97]"
+          disabled={isFinishing}
+          className="ui-button ui-button-secondary flex-1 sm:flex-none"
         >
           Atrás
         </button>
@@ -29,7 +30,8 @@ export function WizardNavButtons({
           type="button"
           onClick={onFinish}
           disabled={isFinishing}
-          className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-emerald-700 active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100"
+          aria-busy={isFinishing}
+          className="ui-button flex-1 bg-emerald-700 text-white hover:bg-emerald-800 sm:flex-none"
         >
           {isFinishing ? "Enviando..." : "Finalizar"}
         </button>
@@ -37,11 +39,12 @@ export function WizardNavButtons({
         <button
           type="button"
           onClick={onNext}
-          className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white transition-[transform,background-color] duration-150 ease-out hover:bg-slate-800 active:scale-[0.97]"
+          disabled={isFinishing}
+          className="ui-button ui-button-primary flex-1 sm:flex-none"
         >
           Continuar
         </button>
       )}
-    </div>
+    </nav>
   );
 }

@@ -30,6 +30,7 @@ export default async function WizardPage({
     <>
       <WizardTour />
       <WizardShell
+        key={project.id}
         projectId={project.id}
         clientName={project.clientName}
         catalog={WIZARD_CATALOG}

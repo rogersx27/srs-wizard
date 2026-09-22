@@ -7,6 +7,20 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+
+- Utilidades reutilizables de autoguardado por pregunta, borradores validados y controles CSS compartidos.
+
+### Changed
+
+- Wizard con posición visible, navegación junto a las respuestas y foco estable al agregar o eliminar requisitos; HTML semántico con regiones, grupos y progreso nativo.
+- Campos y botones consistentes, confirmación visible al copiar enlaces y alternativa seleccionable si el portapapeles falla; dashboard y tablas SRS adaptados a pantallas pequeñas.
+
+### Fixed
+
+- El autoguardado conserva todas las preguntas al avanzar rápido, serializa respuestas y espera los pendientes antes de finalizar; recupera borradores sin diferencias de hidratación.
+- El recorrido guiado limpia su DOM al salir y tolera errores de almacenamiento; los formularios conservan el texto después de un error.
+
 ## [0.2.0] - 2026-09-22
 
 ### Added
