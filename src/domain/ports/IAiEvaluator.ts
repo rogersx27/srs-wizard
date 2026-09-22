@@ -9,6 +9,8 @@ export interface AiEvaluationQuestion {
  * probabilidad (0 a 1) de que la respuesta sea "sí".
  */
 export interface IAiEvaluator {
+  /** Identifica el modelo, para que sus resultados cacheados no se mezclen con los de otro. */
+  readonly modelId: string;
   evaluateBooleans(
     state: string | readonly Record<string, string>[],
     questions: Record<string, AiEvaluationQuestion>

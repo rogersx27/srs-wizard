@@ -3,13 +3,14 @@ import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
 import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
 import { withTimeout } from "../ai/withTimeout.ts";
+import { hashContent } from "../ai/contentHash.ts";
 
 const TIMEOUT_MS = 10_000;
 // Probabilidad mínima que debe dar el modelo de evaluación para marcar un requisito
 // como vago -- por encima de 0.5 para no llenar la revisión de falsos positivos.
 const VAGUENESS_THRESHOLD = 0.7;
 
-type AiCheck = "vagueness" | "duplicate";
+export type AiCheck = "vagueness" | "duplicate";
 
 export type QualityFindingType = "vagueness" | "duplicate" | "missing_priority";
 
@@ -21,7 +22,10 @@ export interface QualityFinding {
 
 export interface QualityAnalysisResult {
   findings: QualityFinding[];
+  /** True solo si todos los chequeos de IA respondieron -- decide si se cachea. */
   aiAvailable: boolean;
+  /** Chequeos de IA que fallaron; sus advertencias faltan en `findings`. */
+  unavailableAiChecks: AiCheck[];
 }
 
 const aiFindingsSchema = z.array(
@@ -139,10 +143,20 @@ export async function findVaguenessWithEvaluator(
 }
 
 /**
+ * Identidad del caché de la revisión con IA. Sin evaluador conserva el hash de
+ * siempre (no invalida cachés existentes); con evaluador incluye su modelo, para que
+ * activar Jev o cambiar de modelo de evaluación no sirva una revisión hecha por otro.
+ */
+export function qualityCacheInputHash(requirements: TraceableRequirement[], evaluator?: IAiEvaluator): string {
+  const content = requirements.map((requirement) => ({ id: requirement.id, text: requirement.text }));
+  return evaluator ? hashContent({ requirements: content, vaguenessEvaluator: evaluator.modelId }) : hashContent(content);
+}
+
+/**
  * Con `evaluator`, la vaguedad la juzga el modelo de evaluación y el asistente solo
- * busca duplicados (en paralelo). Si cualquiera de los dos falla, se muestran los
- * hallazgos que sí llegaron pero `aiAvailable` queda en false para no cachear un
- * resultado incompleto.
+ * busca duplicados (en paralelo). Si uno de los dos falla, se muestran los hallazgos
+ * que sí llegaron, el chequeo fallido queda en `unavailableAiChecks` y `aiAvailable`
+ * en false para no cachear un resultado incompleto.
  */
 export async function analyzeWithAi(
   assistant: IAiAssistant,
@@ -150,24 +164,27 @@ export async function analyzeWithAi(
   evaluator?: IAiEvaluator
 ): Promise<QualityAnalysisResult> {
   if (requirements.length === 0) {
-    return { findings: [], aiAvailable: false };
+    return { findings: [], aiAvailable: false, unavailableAiChecks: [] };
   }
 
-  const tasks = evaluator
-    ? [findVaguenessWithEvaluator(evaluator, requirements), findWithAssistant(assistant, requirements, ["duplicate"])]
-    : [findWithAssistant(assistant, requirements, ["vagueness", "duplicate"])];
+  const tasks: { checks: AiCheck[]; run: Promise<QualityFinding[]> }[] = evaluator
+    ? [
+        { checks: ["vagueness"], run: findVaguenessWithEvaluator(evaluator, requirements) },
+        { checks: ["duplicate"], run: findWithAssistant(assistant, requirements, ["duplicate"]) },
+      ]
+    : [{ checks: ["vagueness", "duplicate"], run: findWithAssistant(assistant, requirements, ["vagueness", "duplicate"]) }];
 
-  const results = await Promise.allSettled(tasks);
+  const results = await Promise.allSettled(tasks.map((task) => task.run));
   const findings: QualityFinding[] = [];
-  let aiAvailable = true;
-  for (const result of results) {
+  const unavailableAiChecks: AiCheck[] = [];
+  results.forEach((result, index) => {
     if (result.status === "fulfilled") {
       findings.push(...result.value);
     } else {
-      aiAvailable = false;
+      unavailableAiChecks.push(...tasks[index].checks);
       console.error("[qualityAnalysis] no se pudo completar el análisis con IA:", result.reason);
     }
-  }
+  });
 
-  return { findings, aiAvailable };
+  return { findings, aiAvailable: unavailableAiChecks.length === 0, unavailableAiChecks };
 }

@@ -6,9 +6,15 @@ import { WIZARD_CATALOG } from "@/wizard-catalog/wizardCatalog";
 import { RequirementIdGenerator } from "./RequirementIdGenerator";
 import { NullAiAssistant } from "../ai/NullAiAssistant.ts";
 import { PrismaAiCacheRepository } from "../persistence/prisma/PrismaAiCacheRepository.ts";
-import { hashContent } from "../ai/contentHash.ts";
 import { withCache } from "../ai/cachedCompute.ts";
-import { findMissingPriority, analyzeWithAi, type QualityFinding } from "./qualityAnalysis";
+import {
+  findMissingPriority,
+  analyzeWithAi,
+  qualityCacheInputHash,
+  type AiCheck,
+  type QualityAnalysisResult,
+  type QualityFinding,
+} from "./qualityAnalysis";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
 
 const CACHE_KIND = "quality_ai_findings";
@@ -16,6 +22,7 @@ const CACHE_KIND = "quality_ai_findings";
 export interface SrsQualityReport {
   findings: QualityFinding[];
   aiAvailable: boolean;
+  unavailableAiChecks: AiCheck[];
   totalRequirements: number;
   requirements: TraceableRequirement[];
 }
@@ -31,11 +38,13 @@ export class SrsQualityAnalyzer {
   async analyze(projectId: string, answers: Answer[]): Promise<SrsQualityReport> {
     const requirements = this.idGenerator.assign(WIZARD_CATALOG, answers);
     const priorityFindings = findMissingPriority(requirements);
-    const { findings: aiFindings, aiAvailable } = await this.resolveAiFindings(projectId, requirements);
+    const { findings: aiFindings, aiAvailable, unavailableAiChecks } = await this.resolveAiFindings(projectId, requirements);
 
     return {
       findings: [...priorityFindings, ...aiFindings],
       aiAvailable,
+      // Las entradas cacheadas antes de existir este campo siempre fueron exitosas.
+      unavailableAiChecks: unavailableAiChecks ?? [],
       totalRequirements: requirements.length,
       requirements,
     };
@@ -44,14 +53,14 @@ export class SrsQualityAnalyzer {
   private async resolveAiFindings(
     projectId: string,
     requirements: TraceableRequirement[]
-  ): Promise<{ findings: QualityFinding[]; aiAvailable: boolean }> {
+  ): Promise<QualityAnalysisResult> {
     if (requirements.length === 0) {
-      return { findings: [], aiAvailable: false };
+      return { findings: [], aiAvailable: false, unavailableAiChecks: [] };
     }
 
-    const inputHash = hashContent(requirements.map((requirement) => ({ id: requirement.id, text: requirement.text })));
+    const inputHash = qualityCacheInputHash(requirements, this.aiEvaluator);
 
-    return withCache<{ findings: QualityFinding[]; aiAvailable: boolean }>(
+    return withCache<QualityAnalysisResult>(
       this.aiCache,
       projectId,
       CACHE_KIND,

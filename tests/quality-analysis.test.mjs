@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { findMissingPriority, parseAiFindings, analyzeWithAi, findVaguenessWithEvaluator } from "../src/infrastructure/srs/qualityAnalysis.ts";
+import {
+  findMissingPriority,
+  parseAiFindings,
+  analyzeWithAi,
+  findVaguenessWithEvaluator,
+  qualityCacheInputHash,
+} from "../src/infrastructure/srs/qualityAnalysis.ts";
+import { withCache } from "../src/infrastructure/ai/cachedCompute.ts";
+import { hashContent } from "../src/infrastructure/ai/contentHash.ts";
 
 const requirement = (id, priority, category = "FUNCTIONAL", text = "texto") => ({ id, category, text, priority });
 
@@ -51,7 +59,7 @@ test("analyzeWithAi skips the call entirely when there are no requirements", asy
   const assistant = { complete: async () => { called = true; return "[]"; } };
   const result = await analyzeWithAi(assistant, []);
   assert.equal(called, false);
-  assert.deepEqual(result, { findings: [], aiAvailable: false });
+  assert.deepEqual(result, { findings: [], aiAvailable: false, unavailableAiChecks: [] });
 });
 
 test("analyzeWithAi returns the parsed findings and aiAvailable true on success", async () => {
@@ -61,6 +69,7 @@ test("analyzeWithAi returns the parsed findings and aiAvailable true on success"
   assert.deepEqual(result, {
     findings: [{ type: "vagueness", requirementIds: ["RF-001"], message: "sin métrica" }],
     aiAvailable: true,
+    unavailableAiChecks: [],
   });
 });
 
@@ -68,7 +77,7 @@ test("analyzeWithAi falls back to no findings and aiAvailable false when the ass
   const requirements = [requirement("RF-001", "ESSENTIAL")];
   const assistant = { complete: async () => { throw new Error("network error"); } };
   const result = await analyzeWithAi(assistant, requirements);
-  assert.deepEqual(result, { findings: [], aiAvailable: false });
+  assert.deepEqual(result, { findings: [], aiAvailable: false, unavailableAiChecks: ["vagueness", "duplicate"] });
 });
 
 test("analyzeWithAi with an evaluator flags vagueness by probability and asks the assistant only for duplicates", async () => {
@@ -80,7 +89,7 @@ test("analyzeWithAi with an evaluator flags vagueness by probability and asks th
       return '[{"type":"duplicate","requirementIds":["RF-001","RF-002"],"message":"parecen iguales"},{"type":"vagueness","requirementIds":["RF-002"],"message":"ignorado"}]';
     },
   };
-  const evaluator = { evaluateBooleans: async () => ({ "RF-001": 0.1, "RF-002": 0.4, "RNF-001": 0.92 }) };
+  const evaluator = { modelId: "typesafe-ai/jev", evaluateBooleans: async () => ({ "RF-001": 0.1, "RF-002": 0.4, "RNF-001": 0.92 }) };
 
   const result = await analyzeWithAi(assistant, requirements, evaluator);
 
@@ -91,26 +100,63 @@ test("analyzeWithAi with an evaluator flags vagueness by probability and asks th
       { type: "duplicate", requirementIds: ["RF-001", "RF-002"], message: "parecen iguales" },
     ],
     aiAvailable: true,
+    unavailableAiChecks: [],
   });
 });
 
-test("analyzeWithAi keeps the findings that arrived but reports aiAvailable false when one side fails", async () => {
+test("analyzeWithAi keeps the vagueness findings and reports duplicates as unavailable when the assistant fails", async () => {
   const requirements = [requirement("RF-001", "ESSENTIAL")];
   const assistant = { complete: async () => { throw new Error("network error"); } };
-  const evaluator = { evaluateBooleans: async () => ({ "RF-001": 0.9 }) };
+  const evaluator = { modelId: "typesafe-ai/jev", evaluateBooleans: async () => ({ "RF-001": 0.9 }) };
 
   const result = await analyzeWithAi(assistant, requirements, evaluator);
 
   assert.deepEqual(result, {
     findings: [{ type: "vagueness", message: "El requisito RF-001 usa cualidades subjetivas sin una métrica verificable.", requirementIds: ["RF-001"] }],
     aiAvailable: false,
+    unavailableAiChecks: ["duplicate"],
   });
+});
+
+test("analyzeWithAi keeps the duplicate findings and reports vagueness as unavailable when the evaluator fails", async () => {
+  const requirements = [requirement("RF-001", "ESSENTIAL"), requirement("RF-002", "ESSENTIAL")];
+  const assistant = { complete: async () => '[{"type":"duplicate","requirementIds":["RF-001","RF-002"],"message":"parecen iguales"}]' };
+  const evaluator = { modelId: "typesafe-ai/jev", evaluateBooleans: async () => { throw new Error("401"); } };
+
+  const result = await analyzeWithAi(assistant, requirements, evaluator);
+
+  assert.deepEqual(result, {
+    findings: [{ type: "duplicate", requirementIds: ["RF-001", "RF-002"], message: "parecen iguales" }],
+    aiAvailable: false,
+    unavailableAiChecks: ["vagueness"],
+  });
+});
+
+test("a review cached before enabling the evaluator is recomputed once the evaluator is configured", async () => {
+  const requirements = [requirement("RF-001", "ESSENTIAL", "FUNCTIONAL", "rápido")];
+  // Hash con el que el flujo anterior (solo asistente) guardaba la revisión.
+  const legacyHash = hashContent(requirements.map(({ id, text }) => ({ id, text })));
+  const store = { inputHash: legacyHash, payload: JSON.stringify({ findings: [], aiAvailable: true }) };
+  const cache = { get: async () => store, set: async () => {} };
+  const evaluator = { modelId: "typesafe-ai/jev", evaluateBooleans: async () => ({}) };
+
+  assert.equal(qualityCacheInputHash(requirements), legacyHash);
+
+  let computed = false;
+  await withCache(cache, "p1", "quality_ai_findings", qualityCacheInputHash(requirements, evaluator), async () => {
+    computed = true;
+    return { value: {}, cacheable: false };
+  });
+  assert.equal(computed, true);
+
+  const otherModel = { ...evaluator, modelId: "otro/modelo" };
+  assert.notEqual(qualityCacheInputHash(requirements, otherModel), qualityCacheInputHash(requirements, evaluator));
 });
 
 test("findVaguenessWithEvaluator sends one question per requirement over the shared requirement list", async () => {
   const requirements = [requirement("RF-001", "ESSENTIAL", "FUNCTIONAL", "rápido")];
   let received;
-  const evaluator = { evaluateBooleans: async (state, questions) => { received = { state, questions }; return {}; } };
+  const evaluator = { modelId: "typesafe-ai/jev", evaluateBooleans: async (state, questions) => { received = { state, questions }; return {}; } };
 
   assert.deepEqual(await findVaguenessWithEvaluator(evaluator, requirements), []);
   assert.deepEqual(received.state, [{ id: "RF-001", category: "FUNCTIONAL", text: "rápido" }]);

@@ -5,13 +5,13 @@ const DEFAULT_MODEL = "typesafe-ai/jev";
 
 export class GatewayAiEvaluator implements IAiEvaluator {
   private readonly gateway: ReturnType<typeof createGateway>;
-  private readonly model: string;
+  readonly modelId: string;
 
   constructor() {
     const apiKey = process.env.AI_GATEWAY_API_KEY;
     if (!apiKey) throw new Error("AI_GATEWAY_API_KEY no está configurado.");
     this.gateway = createGateway({ apiKey });
-    this.model = process.env.AI_GATEWAY_EVALUATION_MODEL || DEFAULT_MODEL;
+    this.modelId = process.env.AI_GATEWAY_EVALUATION_MODEL || DEFAULT_MODEL;
   }
 
   async evaluateBooleans(
@@ -22,7 +22,7 @@ export class GatewayAiEvaluator implements IAiEvaluator {
     // caracteres acepta el proveedor en los IDs (ej. "RF-001").
     const keys = Object.keys(questions);
     const { answers } = await evaluate({
-      model: this.gateway.evaluationModel(this.model),
+      model: this.gateway.evaluationModel(this.modelId),
       state,
       questions: Object.fromEntries(
         keys.map((key, index) => [`q${index}`, { type: "boolean" as const, instructions: questions[key].instructions }])
