@@ -14,7 +14,7 @@ export default async function DashboardPage() {
           <p className="text-slate-600">Aún no tienes proyectos.</p>
           <Link
             href="/dashboard/new"
-            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="ui-button ui-button-primary mt-4"
           >
             Crear el primero
           </Link>

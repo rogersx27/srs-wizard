@@ -66,4 +66,19 @@ Ver [.env.example](.env.example):
 
 ## Contribuir
 
+### Utilidades de interfaz
+
+- `ui-button` junto con `ui-button-primary` o `ui-button-secondary` unifica altura táctil, espaciado y estados de los enlaces de acción y botones. `ui-field` y `ui-progress` estilizan controles HTML nativos. Las clases viven en la capa CSS `components`, de modo que las utilidades Tailwind pueden ajustar cada contexto.
+- `RequirementListInput` mantiene la identidad del DOM y mueve el foco al agregar o eliminar filas. Los datos persistidos siguen siendo listas de texto.
+- `createAutosaveQueue` conserva los pendientes de cada pregunta y serializa las peticiones. `useWizardAutosave` integra la cola, el estado React y la recuperación tras reconectar. Los borradores locales contienen solo cambios sin confirmar y se validan antes de restaurar.
+- Usa HTML semántico antes de agregar ARIA: enlaces para navegar, botones para acciones, `fieldset`/`legend` para grupos y una región `main` por página. Mantén el foco visible y respeta movimiento reducido.
+
+Valida lint y las regresiones del autoguardado en la etapa de build de Docker (Node 22, sin instalar dependencias en Windows):
+
+```bash
+docker build --target builder -t srs-wizard-check .
+docker run --rm srs-wizard-check pnpm lint
+docker run --rm srs-wizard-check pnpm test
+```
+
 Este repo sigue Gitflow, Conventional Commits y Keep a Changelog. Las reglas completas están en [AGENTS.md](AGENTS.md) y el flujo de trabajo en [CONTRIBUTING.md](CONTRIBUTING.md). Los cambios notables se registran en [CHANGELOG.md](CHANGELOG.md).

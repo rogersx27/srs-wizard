@@ -16,7 +16,7 @@ export default async function SrsPage({
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <Link href={`/dashboard/${projectId}`} className="text-sm text-slate-500 hover:underline">
+        <Link href={`/dashboard/${projectId}`} className="inline-flex min-h-11 items-center text-sm text-slate-600 hover:underline">
           ← Volver
         </Link>
         <div className="flex flex-wrap gap-2">
@@ -25,20 +25,20 @@ export default async function SrsPage({
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Vista de impresión (se abre en una pestaña nueva)"
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="ui-button ui-button-secondary"
           >
             Vista de impresión
           </Link>
           <Link
             href={`/dashboard/${projectId}/download`}
-            className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800"
+            className="ui-button ui-button-primary"
           >
             Descargar .md
           </Link>
         </div>
       </div>
 
-      <article className="markdown-body mt-6 rounded-2xl border border-slate-200 bg-white p-8">
+      <article className="markdown-body mt-6 rounded-2xl border border-slate-200 bg-white p-4 sm:p-8">
         <MarkdownView markdown={result.markdown} />
       </article>
     </div>

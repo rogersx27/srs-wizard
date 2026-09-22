@@ -13,7 +13,7 @@ export default async function SrsPrintPage({
   if (!result) notFound();
 
   return (
-    <div className="markdown-body mx-auto max-w-3xl bg-white p-10">
+    <div className="markdown-body mx-auto max-w-3xl bg-white p-4 sm:p-10">
       <MarkdownView markdown={result.markdown} />
     </div>
   );

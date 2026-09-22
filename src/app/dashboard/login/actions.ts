@@ -8,6 +8,7 @@ const sessionService = new DashboardSessionService();
 
 export interface LoginActionState {
   error?: string;
+  fieldError?: boolean;
 }
 
 export async function loginAction(_prevState: LoginActionState | undefined, formData: FormData): Promise<LoginActionState> {
@@ -21,7 +22,7 @@ export async function loginAction(_prevState: LoginActionState | undefined, form
   }
 
   if (!isValid) {
-    return { error: "Contraseña incorrecta." };
+    return { error: "Contraseña incorrecta.", fieldError: true };
   }
 
   const token = sessionService.sign();
