@@ -20,6 +20,10 @@ export class OpenAiAssistant implements IAiAssistant {
       input: prompt,
       temperature: options?.temperature,
       max_output_tokens: options?.maxOutputTokens,
+      // Estas tareas son reescritura/clasificación de texto, no requieren razonamiento
+      // profundo -- "low" evita que los modelos de razonamiento gasten la mayoría del
+      // presupuesto de tokens (y del tiempo) en tokens de razonamiento ocultos.
+      reasoning: { effort: "low" },
     });
     return response.output_text ?? "";
   }
