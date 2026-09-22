@@ -64,7 +64,8 @@ export async function resolveNarrativeSection(
     const trimmed = rewritten.trim();
     if (!trimmed) return { text: raw, usedAi: false, attempted: true };
     return { text: trimmed, usedAi: true, attempted: true };
-  } catch {
+  } catch (error) {
+    console.error(`[narrativeRewriter] fallback a texto crudo para "${kind}":`, error);
     return { text: raw, usedAi: false, attempted: true };
   }
 }
