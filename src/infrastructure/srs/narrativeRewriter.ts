@@ -1,4 +1,5 @@
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
+import { withTimeout } from "../ai/withTimeout.ts";
 
 const TIMEOUT_MS = 10_000;
 
@@ -30,22 +31,6 @@ const PROMPTS: Record<NarrativeKind, string> = {
     "sin inventar información nueva ni agregar detalles que el cliente no mencionó. Conserva el significado " +
     "exacto. Responde solo con el párrafo reescrito, sin encabezados ni comentarios adicionales.\n\nTexto del cliente:\n",
 };
-
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("AI request timed out")), ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error) => {
-        clearTimeout(timer);
-        reject(error);
-      }
-    );
-  });
-}
 
 export async function resolveNarrativeSection(
   assistant: IAiAssistant,
