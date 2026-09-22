@@ -7,6 +7,8 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-22
+
 ### Added
 
 - Diccionarios de ideas y ejemplos editables en modales para describir el proyecto y sus usuarios, sin IA; funcionalidades sugeridas que se pueden adaptar o complementar con opciones propias.
@@ -74,7 +76,8 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - Vista de impresión y descarga `.md` del SRS compilado.
 - Entorno de desarrollo con Docker Compose (Next.js 16 + Prisma 6 + SQLite), pensado para evitar los límites de ruta de Windows.
 
-[Unreleased]: https://github.com/rogersx27/srs-wizard/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/rogersx27/srs-wizard/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rogersx27/srs-wizard/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/rogersx27/srs-wizard/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/rogersx27/srs-wizard/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rogersx27/srs-wizard/compare/v0.1.0...v0.2.0
