@@ -10,6 +10,7 @@ import { PrismaAiCacheRepository } from "@/infrastructure/persistence/prisma/Pri
 import { hashContent } from "@/infrastructure/ai/contentHash";
 import { withCache } from "@/infrastructure/ai/cachedCompute";
 import { resolveNarrativeSection } from "./narrativeRewriter";
+import { collectAnswerNotes } from "./answerNotes";
 
 const CACHE_KIND = "srs_narrative";
 
@@ -31,10 +32,12 @@ export class SrsDocumentGenerator {
       byQuestionId.get("contexto-usuarios")
     );
 
-    const integrations = byQuestionId.get("sistema-integraciones");
     return this.template.render({
-      project, requirements, narrative, generatedAt: new Date(),
-      integrationNote: integrations?.valueList?.length === 0 ? integrations.valueText ?? undefined : undefined,
+      project,
+      requirements,
+      narrative,
+      generatedAt: new Date(),
+      answerNotes: collectAnswerNotes(WIZARD_CATALOG, answers),
     });
   }
 

@@ -4,7 +4,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { Priority } from "@/domain/entities/Answer";
 import { PrioritySelector } from "./PrioritySelector";
 
-interface RequirementRow { id: number; value: string; priority: Priority | null; }
+interface RequirementRow {
+  id: number;
+  value: string;
+  priority: Priority | null;
+}
 
 interface RequirementListInputProps {
   items: string[];
@@ -24,16 +28,32 @@ export function RequirementListInput({ items, priorities, legacyPriority, label,
   const pendingFocus = useRef<number | null>(null);
   const [model, setModel] = useState(() => {
     const values = items.length ? items : [""];
-    return { items, priorities, rows: values.map((value, id) => ({ id, value, priority: priorities ? priorities[id] ?? null : legacyPriority })), nextId: values.length };
+    return {
+      items,
+      priorities,
+      rows: values.map((value, id) => ({
+        id,
+        value,
+        priority: priorities ? priorities[id] ?? null : legacyPriority,
+      })),
+      nextId: values.length,
+    };
   });
 
   // Preserve row identity during edits and accept restored server/local drafts.
   if (model.items !== items || model.priorities !== priorities) {
     let nextId = model.nextId;
     const values = items.length ? items : [""];
-    setModel({ items, priorities, rows: values.map((value, index) => ({
-      id: model.rows[index]?.id ?? nextId++, value, priority: priorities ? priorities[index] ?? null : legacyPriority,
-    })), nextId });
+    setModel({
+      items,
+      priorities,
+      rows: values.map((value, index) => ({
+        id: model.rows[index]?.id ?? nextId++,
+        value,
+        priority: priorities ? priorities[index] ?? null : legacyPriority,
+      })),
+      nextId,
+    });
   }
 
   useEffect(() => {
@@ -79,8 +99,17 @@ export function RequirementListInput({ items, priorities, legacyPriority, label,
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion) => {
               const selected = model.rows.some((row) => normalize(row.value) === normalize(suggestion));
-              return <button key={suggestion} type="button" className="ui-button ui-button-secondary text-left" disabled={selected}
-                onClick={() => addItem(suggestion)}>{selected ? "✓" : "+"} {suggestion}</button>;
+              return (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className="ui-button ui-button-secondary text-left"
+                  disabled={selected}
+                  onClick={() => addItem(suggestion)}
+                >
+                  {selected ? "✓" : "+"} {suggestion}
+                </button>
+              );
             })}
           </div>
         </details>
@@ -93,24 +122,39 @@ export function RequirementListInput({ items, priorities, legacyPriority, label,
               <div className="flex items-end gap-2">
                 <div className="min-w-0 flex-1">
                   <label htmlFor={inputId} className="mb-2 block text-xs font-medium text-slate-600">Elemento {index + 1}</label>
-                  <input ref={(element) => {
-                    if (element) inputs.current.set(row.id, element);
-                    else inputs.current.delete(row.id);
-                  }} id={inputId} type="text" value={row.value}
-                    onChange={(event) => commit(model.rows.map((item) => item.id === row.id ? { ...item, value: event.target.value } : item))}
+                  <input
+                    ref={(element) => {
+                      if (element) inputs.current.set(row.id, element);
+                      else inputs.current.delete(row.id);
+                    }}
+                    id={inputId}
+                    type="text"
+                    value={row.value}
+                    onChange={(event) => commit(model.rows.map((item) => (
+                      item.id === row.id ? { ...item, value: event.target.value } : item
+                    )))}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && !event.nativeEvent.isComposing) {
                         event.preventDefault();
                         if (row.value.trim()) addItem();
                       }
-                    }} placeholder="Escribe aquí y pulsa Enter para agregar otro" className="ui-field" />
+                    }}
+                    placeholder="Escribe aquí y pulsa Enter para agregar otro"
+                    className="ui-field"
+                  />
                 </div>
                 <button type="button" onClick={() => removeItem(row.id)} className="ui-button min-w-11 shrink-0 px-2 text-slate-600 hover:bg-red-50 hover:text-red-700"
                   aria-label={`Eliminar elemento ${index + 1}`}><span aria-hidden="true">✕</span></button>
               </div>
               <div data-tour-id="priority-selector">
-                <PrioritySelector name={`priority-${inputId}`} label={`Importancia del elemento ${index + 1}`} value={row.priority}
-                  onChange={(priority) => commit(model.rows.map((item) => item.id === row.id ? { ...item, priority } : item))} />
+                <PrioritySelector
+                  name={`priority-${inputId}`}
+                  label={`Importancia del elemento ${index + 1}`}
+                  value={row.priority}
+                  onChange={(priority) => commit(model.rows.map((item) => (
+                    item.id === row.id ? { ...item, priority } : item
+                  )))}
+                />
               </div>
             </li>
           );

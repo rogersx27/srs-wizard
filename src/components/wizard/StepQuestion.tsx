@@ -36,21 +36,21 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
       <div className="mt-4">
         {question.kind === "long_text" && (
           <>
-          <textarea
-            ref={textareaRef}
-            id={fieldId}
-            rows={4}
-            value={answer.valueText ?? ""}
-            placeholder={question.placeholder}
-            aria-labelledby={questionLabelId}
-            aria-describedby={question.helpText ? helpTextId : undefined}
-            onChange={(e) => onChange({ ...answer, valueText: e.target.value })}
-            className="ui-field min-h-32 resize-y"
-          />
-          {question.writingGuide && <WritingHelp guide={question.writingGuide} onInsert={(text) => {
-            onChange({ ...answer, valueText: answer.valueText?.trim() ? `${answer.valueText.trimEnd()}\n\n${text}` : text });
-            textareaRef.current?.focus();
-          }} />}
+            <textarea
+              ref={textareaRef}
+              id={fieldId}
+              rows={4}
+              value={answer.valueText ?? ""}
+              placeholder={question.placeholder}
+              aria-labelledby={questionLabelId}
+              aria-describedby={question.helpText ? helpTextId : undefined}
+              onChange={(e) => onChange({ ...answer, valueText: e.target.value })}
+              className="ui-field min-h-32 resize-y"
+            />
+            {question.writingGuide && <WritingHelp guide={question.writingGuide} onInsert={(text) => {
+              onChange({ ...answer, valueText: answer.valueText?.trim() ? `${answer.valueText.trimEnd()}\n\n${text}` : text });
+              textareaRef.current?.focus();
+            }} />}
           </>
         )}
 
@@ -73,11 +73,10 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
             {question.options?.map((option) => (
               <label
                 key={option}
-                className={`flex min-h-11 cursor-pointer items-center rounded-lg border px-3 py-2 text-left text-sm transition-[background-color,color,border-color] duration-150 ease-out focus-within:ring-2 focus-within:ring-slate-900 focus-within:ring-offset-2 ${
-                  answer.valueText === option
+                className={`flex min-h-11 cursor-pointer items-center rounded-lg border px-3 py-2 text-left text-sm transition-[background-color,color,border-color] duration-150 ease-out focus-within:ring-2 focus-within:ring-slate-900 focus-within:ring-offset-2 ${answer.valueText === option
                     ? "border-slate-900 bg-slate-900 text-white"
                     : "border-slate-300 text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -95,26 +94,26 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
 
         {question.kind === "requirement_list" && (
           <div className="space-y-4">
-          {question.emptyAnswerLabel && <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <label className={`flex min-h-11 items-center gap-3 text-sm font-medium ${hasItems ? "text-slate-500" : "cursor-pointer text-slate-800"}`}>
-              <input type="checkbox" className="h-5 w-5 shrink-0 accent-slate-900" checked={noIntegrations} disabled={hasItems}
-                onChange={(event) => onChange({ ...answer, valueText: event.target.checked ? question.emptyAnswerLabel! : null, valueList: [], itemPriorities: [], priority: null })} />
-              {question.emptyAnswerLabel}
-            </label>
-            {hasItems && <p className="mt-1 text-xs text-slate-500">Para elegir esta opción, elimina primero las conexiones de la lista.</p>}
-            {noIntegrations && <p className="mt-1 text-sm text-slate-600" role="status">Listo, puedes continuar. Desmarca esta opción si quieres agregar una conexión.</p>}
-          </div>}
-          {!noIntegrations &&
-          <RequirementListInput
-            items={answer.valueList ?? [""]}
-            priorities={answer.itemPriorities}
-            legacyPriority={answer.priority}
-            suggestions={question.suggestions}
-            label={question.prompt}
-            describedBy={question.helpText ? helpTextId : undefined}
-            onChange={(items, itemPriorities) => onChange({ ...answer, valueText: null, valueList: items, itemPriorities, priority: null })}
-          />
-          }
+            {question.emptyAnswerLabel && <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <label className={`flex min-h-11 items-center gap-3 text-sm font-medium ${hasItems ? "text-slate-500" : "cursor-pointer text-slate-800"}`}>
+                <input type="checkbox" className="h-5 w-5 shrink-0 accent-slate-900" checked={noIntegrations} disabled={hasItems}
+                  onChange={(event) => onChange({ ...answer, valueText: event.target.checked ? question.emptyAnswerLabel! : null, valueList: [], itemPriorities: [], priority: null })} />
+                {question.emptyAnswerLabel}
+              </label>
+              {hasItems && <p className="mt-1 text-xs text-slate-500">Para elegir esta opción, elimina primero las conexiones de la lista.</p>}
+              {noIntegrations && <p className="mt-1 text-sm text-slate-600" role="status">Listo, puedes continuar. Desmarca esta opción si quieres agregar una conexión.</p>}
+            </div>}
+            {!noIntegrations &&
+              <RequirementListInput
+                items={answer.valueList ?? [""]}
+                priorities={answer.itemPriorities}
+                legacyPriority={answer.priority}
+                suggestions={question.suggestions}
+                label={question.prompt}
+                describedBy={question.helpText ? helpTextId : undefined}
+                onChange={(items, itemPriorities) => onChange({ ...answer, valueText: null, valueList: items, itemPriorities, priority: null })}
+              />
+            }
           </div>
         )}
         {question.kind === "multiple_choice" && <MultipleChoiceInput options={question.options ?? []} answer={answer} label={question.prompt}

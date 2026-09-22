@@ -1,5 +1,5 @@
 import type { WizardSection } from "./types";
-import { PROJECT_GUIDE, USERS_GUIDE } from "./writingGuides";
+import { PROJECT_GUIDE, USERS_GUIDE } from "./writingGuides.ts";
 
 export const WIZARD_CATALOG: WizardSection[] = [
   {
@@ -57,6 +57,7 @@ export const WIZARD_CATALOG: WizardSection[] = [
         prompt: "¿Hay algo con lo que el sistema deba conectarse?",
         helpText: "Ej: WhatsApp, una pasarela de pagos o tu inventario actual. Agrega cada conexión con Enter o indica que no necesitas ninguna.",
         emptyAnswerLabel: "No necesito integraciones por ahora",
+        emptyAnswerNote: "El cliente indicó que por ahora no se requieren integraciones.",
         kind: "requirement_list",
         isRequirement: true,
         ieee830Category: "SYSTEM",

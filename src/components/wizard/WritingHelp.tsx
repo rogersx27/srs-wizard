@@ -28,7 +28,11 @@ export function WritingHelp({ guide, onInsert }: { guide: WritingGuide; onInsert
             <div className="mt-2 flex flex-wrap gap-2">
               {group.ideas.map((idea) => (
                 <button key={idea} type="button" className="ui-button ui-button-secondary rounded-full px-3"
-                  onClick={() => setDraft((previous) => previous ? `${previous.trimEnd()} ${idea.toLocaleLowerCase("es")}` : idea)}>{idea}</button>
+                  onClick={() => setDraft((previous) => {
+                    const text = previous.trimEnd();
+                    const separator = /[.!?…]$/.test(text) ? " " : ". ";
+                    return text ? `${text}${separator}${idea}` : idea;
+                  })}>{idea}</button>
               ))}
             </div>
           </section>
@@ -53,7 +57,9 @@ export function WritingHelp({ guide, onInsert }: { guide: WritingGuide; onInsert
         <div className="mt-4 flex flex-wrap justify-end gap-2">
           <button type="button" className="ui-button ui-button-secondary" onClick={() => dialog.current?.close()}>Volver</button>
           <button type="button" className="ui-button ui-button-primary" disabled={!draft.trim()} onClick={() => {
-            dialog.current?.close(); onInsert(draft.trim()); setDraft("");
+            dialog.current?.close();
+            onInsert(draft.trim());
+            setDraft("");
           }}>Añadir a mi respuesta</button>
         </div>
       </dialog>

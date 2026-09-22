@@ -19,6 +19,7 @@ export interface WizardQuestion {
   writingGuide?: WritingGuide;
   suggestions?: string[];
   emptyAnswerLabel?: string;
+  emptyAnswerNote?: string;
   isRequirement: boolean;
   ieee830Category: Ieee830Category;
 }
