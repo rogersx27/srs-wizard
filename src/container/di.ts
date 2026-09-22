@@ -17,12 +17,11 @@ import { GenerateSrsDocumentUseCase } from "@/application/use-cases/GenerateSrsD
 import { AnalyzeSrsQualityUseCase } from "@/application/use-cases/AnalyzeSrsQualityUseCase";
 import { SrsDocumentGenerator } from "@/infrastructure/srs/SrsDocumentGenerator";
 import { SrsQualityAnalyzer } from "@/infrastructure/srs/SrsQualityAnalyzer";
-import { GeminiAiAssistant } from "@/infrastructure/ai/GeminiAiAssistant";
-import { AnthropicAiAssistant } from "@/infrastructure/ai/AnthropicAiAssistant";
-import { OpenAiAssistant } from "@/infrastructure/ai/OpenAiAssistant";
-import { GatewayAiAssistant } from "@/infrastructure/ai/GatewayAiAssistant";
-import { GatewayAiEvaluator } from "@/infrastructure/ai/GatewayAiEvaluator";
-import { NullAiAssistant } from "@/infrastructure/ai/NullAiAssistant";
+import { NullAiAssistant, resolveAiProvider } from "@rogersx27/ai-ports";
+import { GeminiAiAssistant } from "@rogersx27/ai-ports/gemini";
+import { AnthropicAiAssistant } from "@rogersx27/ai-ports/anthropic";
+import { OpenAiAssistant } from "@rogersx27/ai-ports/openai";
+import { GatewayAiAssistant, GatewayAiEvaluator } from "@rogersx27/ai-ports/gateway";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
 import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 
@@ -30,23 +29,30 @@ const projectRepository = new PrismaProjectRepository();
 const answerRepository = new PrismaAnswerRepository();
 const aiCacheRepository = new PrismaAiCacheRepository();
 
+// La elección del proveedor (AI_PROVIDER o, si no, el primero con clave: Gemini,
+// Anthropic, OpenAI, Gateway) la hace la librería; aquí solo se construye el adaptador
+// con imports estáticos, para que el container siga siendo síncrono.
 function createAiAssistant(): IAiAssistant {
-  const provider = process.env.AI_PROVIDER?.toLowerCase();
-  if (provider === "anthropic") return new AnthropicAiAssistant();
-  if (provider === "openai") return new OpenAiAssistant();
-  if (provider === "gemini") return new GeminiAiAssistant();
-  if (provider === "gateway") return new GatewayAiAssistant();
-  if (process.env.GEMINI_API_KEY) return new GeminiAiAssistant();
-  if (process.env.ANTHROPIC_API_KEY) return new AnthropicAiAssistant();
-  if (process.env.OPENAI_API_KEY) return new OpenAiAssistant();
-  if (process.env.AI_GATEWAY_API_KEY) return new GatewayAiAssistant();
-  return new NullAiAssistant();
+  const env = process.env;
+  switch (resolveAiProvider(env)) {
+    case "gemini":
+      return new GeminiAiAssistant({ apiKey: env.GEMINI_API_KEY ?? "", model: env.GEMINI_MODEL });
+    case "anthropic":
+      return new AnthropicAiAssistant({ apiKey: env.ANTHROPIC_API_KEY ?? "", model: env.ANTHROPIC_MODEL });
+    case "openai":
+      return new OpenAiAssistant({ apiKey: env.OPENAI_API_KEY ?? "", model: env.OPENAI_MODEL });
+    case "gateway":
+      return new GatewayAiAssistant({ apiKey: env.AI_GATEWAY_API_KEY ?? "", model: env.AI_GATEWAY_MODEL });
+    default:
+      return new NullAiAssistant();
+  }
 }
 
 // El modelo de evaluación (Jev por defecto) es independiente de AI_PROVIDER: solo
 // juzga vaguedad en la revisión de calidad, la redacción sigue en el asistente.
 function createAiEvaluator(): IAiEvaluator | undefined {
-  if (process.env.AI_GATEWAY_API_KEY) return new GatewayAiEvaluator();
+  const apiKey = process.env.AI_GATEWAY_API_KEY;
+  if (apiKey) return new GatewayAiEvaluator({ apiKey, model: process.env.AI_GATEWAY_EVALUATION_MODEL });
   return undefined;
 }
 

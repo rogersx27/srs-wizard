@@ -2,8 +2,7 @@ import { z } from "zod";
 import type { IAiAssistant } from "@/domain/ports/IAiAssistant";
 import type { IAiEvaluator } from "@/domain/ports/IAiEvaluator";
 import type { TraceableRequirement } from "./RequirementIdGenerator";
-import { withTimeout } from "../ai/withTimeout.ts";
-import { hashContent } from "../ai/contentHash.ts";
+import { hashContent, withTimeout } from "@rogersx27/ai-ports";
 
 const TIMEOUT_MS = 10_000;
 // Probabilidad mínima que debe dar el modelo de evaluación para marcar un requisito

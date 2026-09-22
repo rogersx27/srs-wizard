@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { resolveNarrativeSection } from "../src/infrastructure/srs/narrativeRewriter.ts";
-import { NullAiAssistant } from "../src/infrastructure/ai/NullAiAssistant.ts";
-import { AiUnavailableError } from "../src/infrastructure/ai/AiUnavailableError.ts";
+import { AiUnavailableError, NullAiAssistant } from "@rogersx27/ai-ports";
 
 const answer = (valueText) => ({
   valueText,

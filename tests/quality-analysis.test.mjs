@@ -7,8 +7,7 @@ import {
   findVaguenessWithEvaluator,
   qualityCacheInputHash,
 } from "../src/infrastructure/srs/qualityAnalysis.ts";
-import { withCache } from "../src/infrastructure/ai/cachedCompute.ts";
-import { hashContent } from "../src/infrastructure/ai/contentHash.ts";
+import { hashContent, withCache } from "@rogersx27/ai-ports";
 
 const requirement = (id, priority, category = "FUNCTIONAL", text = "texto") => ({ id, category, text, priority });
 
