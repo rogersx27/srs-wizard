@@ -4,6 +4,7 @@ export interface LocalAnswer {
   valueText: string | null;
   valueList: string[] | null;
   priority: Priority | null;
+  itemPriorities?: (Priority | null)[] | null;
 }
 
 export function emptyAnswer(): LocalAnswer {

@@ -1,10 +1,11 @@
 "use client";
 
 import type { WizardQuestion } from "@/wizard-catalog/types";
-import { useId, type RefObject } from "react";
+import { useId, useRef, type RefObject } from "react";
 import type { LocalAnswer } from "./types";
-import { PrioritySelector } from "./PrioritySelector";
 import { RequirementListInput } from "./RequirementListInput";
+import { WritingHelp } from "./WritingHelp";
+import { MultipleChoiceInput } from "./MultipleChoiceInput";
 
 interface StepQuestionProps {
   question: WizardQuestion;
@@ -17,6 +18,9 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
   const fieldId = useId();
   const questionLabelId = `${fieldId}-label`;
   const helpTextId = `${fieldId}-help`;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const noIntegrations = Boolean(question.emptyAnswerLabel && answer.valueText === question.emptyAnswerLabel && !answer.valueList?.some((item) => item.trim()));
+  const hasItems = Boolean(answer.valueList?.some((item) => item.trim()));
 
   return (
     <section aria-labelledby={questionLabelId} className="step-enter min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -31,7 +35,9 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
 
       <div className="mt-4">
         {question.kind === "long_text" && (
+          <>
           <textarea
+            ref={textareaRef}
             id={fieldId}
             rows={4}
             value={answer.valueText ?? ""}
@@ -41,6 +47,11 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
             onChange={(e) => onChange({ ...answer, valueText: e.target.value })}
             className="ui-field min-h-32 resize-y"
           />
+          {question.writingGuide && <WritingHelp guide={question.writingGuide} onInsert={(text) => {
+            onChange({ ...answer, valueText: answer.valueText?.trim() ? `${answer.valueText.trimEnd()}\n\n${text}` : text });
+            textareaRef.current?.focus();
+          }} />}
+          </>
         )}
 
         {question.kind === "short_text" && (
@@ -83,24 +94,32 @@ export function StepQuestion({ question, answer, headingRef, onChange }: StepQue
         )}
 
         {question.kind === "requirement_list" && (
+          <div className="space-y-4">
+          {question.emptyAnswerLabel && <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <label className={`flex min-h-11 items-center gap-3 text-sm font-medium ${hasItems ? "text-slate-500" : "cursor-pointer text-slate-800"}`}>
+              <input type="checkbox" className="h-5 w-5 shrink-0 accent-slate-900" checked={noIntegrations} disabled={hasItems}
+                onChange={(event) => onChange({ ...answer, valueText: event.target.checked ? question.emptyAnswerLabel! : null, valueList: [], itemPriorities: [], priority: null })} />
+              {question.emptyAnswerLabel}
+            </label>
+            {hasItems && <p className="mt-1 text-xs text-slate-500">Para elegir esta opción, elimina primero las conexiones de la lista.</p>}
+            {noIntegrations && <p className="mt-1 text-sm text-slate-600" role="status">Listo, puedes continuar. Desmarca esta opción si quieres agregar una conexión.</p>}
+          </div>}
+          {!noIntegrations &&
           <RequirementListInput
             items={answer.valueList ?? [""]}
+            priorities={answer.itemPriorities}
+            legacyPriority={answer.priority}
+            suggestions={question.suggestions}
             label={question.prompt}
             describedBy={question.helpText ? helpTextId : undefined}
-            onChange={(items) => onChange({ ...answer, valueList: items })}
+            onChange={(items, itemPriorities) => onChange({ ...answer, valueText: null, valueList: items, itemPriorities, priority: null })}
           />
+          }
+          </div>
         )}
+        {question.kind === "multiple_choice" && <MultipleChoiceInput options={question.options ?? []} answer={answer} label={question.prompt}
+          describedBy={question.helpText ? helpTextId : undefined} onChange={onChange} />}
       </div>
-
-      {question.isRequirement && (
-        <div data-tour-id="priority-selector" className="mt-5">
-          <PrioritySelector
-            name={`priority-${fieldId}`}
-            value={answer.priority}
-            onChange={(priority) => onChange({ ...answer, priority })}
-          />
-        </div>
-      )}
     </section>
   );
 }

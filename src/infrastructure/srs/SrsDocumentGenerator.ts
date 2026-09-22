@@ -31,7 +31,11 @@ export class SrsDocumentGenerator {
       byQuestionId.get("contexto-usuarios")
     );
 
-    return this.template.render({ project, requirements, narrative, generatedAt: new Date() });
+    const integrations = byQuestionId.get("sistema-integraciones");
+    return this.template.render({
+      project, requirements, narrative, generatedAt: new Date(),
+      integrationNote: integrations?.valueList?.length === 0 ? integrations.valueText ?? undefined : undefined,
+    });
   }
 
   private async resolveNarrative(

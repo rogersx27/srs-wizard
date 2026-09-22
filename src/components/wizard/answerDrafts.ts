@@ -11,7 +11,10 @@ function isLocalAnswer(value: unknown): value is LocalAnswer {
   if (!isRecord(value)) return false;
   return (value.valueText === null || typeof value.valueText === "string")
     && (value.valueList === null || (Array.isArray(value.valueList) && value.valueList.every((item) => typeof item === "string")))
-    && (value.priority === null || (typeof value.priority === "string" && ["ESSENTIAL", "CONDITIONAL", "OPTIONAL"].includes(value.priority)));
+    && (value.priority === null || (typeof value.priority === "string" && ["ESSENTIAL", "CONDITIONAL", "OPTIONAL"].includes(value.priority)))
+    && (value.itemPriorities == null || (Array.isArray(value.itemPriorities)
+      && value.itemPriorities.length === (Array.isArray(value.valueList) ? value.valueList.length : 0)
+      && value.itemPriorities.every((priority) => priority === null || ["ESSENTIAL", "CONDITIONAL", "OPTIONAL"].includes(priority))));
 }
 
 function isEmpty(answer: LocalAnswer | undefined) {
@@ -54,7 +57,8 @@ export function writeAnswerDrafts(key: string, answers: AnswerMap, storage?: Dra
 
 function sameAnswer(left: LocalAnswer | undefined, right: LocalAnswer) {
   return left?.valueText === right.valueText && left?.priority === right.priority
-    && JSON.stringify(left?.valueList) === JSON.stringify(right.valueList);
+    && JSON.stringify(left?.valueList) === JSON.stringify(right.valueList)
+    && JSON.stringify(left?.itemPriorities) === JSON.stringify(right.itemPriorities);
 }
 
 /** Applies this instance's changes without letting an old acknowledgement erase another draft. */

@@ -7,6 +7,7 @@ export interface AnswerProps {
   valueText: string | null;
   valueList: string[] | null;
   priority: Priority | null;
+  itemPriorities?: (Priority | null)[] | null;
   updatedAt: Date;
 }
 
@@ -39,6 +40,10 @@ export class Answer {
 
   get updatedAt(): Date {
     return this.props.updatedAt;
+  }
+
+  get itemPriorities(): (Priority | null)[] | null {
+    return this.props.itemPriorities ?? null;
   }
 
   isEmpty(): boolean {

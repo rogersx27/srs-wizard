@@ -21,6 +21,7 @@ export class AnswerMapper {
       valueText: record.valueText,
       valueList,
       priority: record.priority,
+      itemPriorities: record.itemPrioritiesJson ? JSON.parse(record.itemPrioritiesJson) : null,
       updatedAt: record.updatedAt,
     });
   }

@@ -20,6 +20,7 @@ export interface SrsTemplateInput {
   narrative: SrsNarrative;
   requirements: TraceableRequirement[];
   generatedAt: Date;
+  integrationNote?: string;
 }
 
 export class SrsMarkdownTemplate {
@@ -51,10 +52,11 @@ export class SrsMarkdownTemplate {
     let sectionNumber = 3;
     for (const category of IEEE830_REQUIREMENT_ORDER) {
       lines.push(`## ${sectionNumber}. ${IEEE830_LABELS[category]}`, ``);
+      if (category === "SYSTEM" && input.integrationNote) lines.push(input.integrationNote, ``);
 
       const rows = requirements.filter((requirement) => requirement.category === category);
       if (rows.length === 0) {
-        lines.push(`_No especificado._`);
+        if (!(category === "SYSTEM" && input.integrationNote)) lines.push(`_No especificado._`);
       } else {
         lines.push(`| ID | Requisito | Prioridad |`);
         lines.push(`|----|-----------|-----------|`);
