@@ -1,0 +1,27 @@
+import Link from "next/link";
+import { container } from "@/container/di";
+import { ProjectList } from "@/components/dashboard/ProjectList";
+
+export default async function DashboardPage() {
+  const projects = await container.listProjects.execute();
+
+  return (
+    <div>
+      <h1 className="text-2xl font-semibold text-slate-900">Tus proyectos</h1>
+
+      {projects.length === 0 ? (
+        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+          <p className="text-slate-600">Aún no tienes proyectos.</p>
+          <Link
+            href="/dashboard/new"
+            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Crear el primero
+          </Link>
+        </div>
+      ) : (
+        <ProjectList projects={projects.map((project) => project.toJSON())} />
+      )}
+    </div>
+  );
+}
